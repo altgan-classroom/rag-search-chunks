@@ -1,0 +1,555 @@
+{
+ "name": "open-arxiv",
+ "description": "Open arXiv papers on RAG (domain-shift check). Model-authored, machine-verified, needs review.",
+ "questions": [
+  {
+   "id": "rag-index",
+   "question": "How many Wikipedia chunks make up the non-parametric memory index in the RAG paper?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2005.11401-RAG-Lewis",
+     "pages": [
+      4,
+      19
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "21M",
+     "21 million"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "rag-gen",
+   "question": "Which seq2seq model serves as the generator in RAG?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2005.11401-RAG-Lewis",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "BART"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "rag-variants",
+   "question": "What are the two RAG model formulations?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2005.11401-RAG-Lewis",
+     "pages": [
+      3
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "RAG-Sequence"
+    ],
+    [
+     "RAG-Token"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "rag-chunk",
+   "question": "How long is each Wikipedia chunk in the RAG paper's index?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2005.11401-RAG-Lewis",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "100-word",
+     "100 word"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "rag-hnsw",
+   "question": "Which approximate search method does RAG use for fast document retrieval?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2005.11401-RAG-Lewis",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Navigable Small World"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "self-sizes",
+   "question": "Which two parameter sizes of Self-RAG are evaluated?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "7B"
+    ],
+    [
+     "13B"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "self-tokens",
+   "question": "Into which two categories are Self-RAG's reflection tokens divided?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "retrieval"
+    ],
+    [
+     "critique"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "self-critic",
+   "question": "Why does Self-RAG use an offline critic model when creating training data?",
+   "category": "paraphrase",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "reducing overhead"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "self-issup",
+   "question": "What values can the ISSUP critique token take in Self-RAG?",
+   "category": "definition",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "fully supported"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "self-isrel",
+   "question": "What does the ISREL token decide in Self-RAG?",
+   "category": "definition",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "provides useful information"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "crag-init",
+   "question": "Which model initialises the retrieval evaluator in CRAG?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "T5-large"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "crag-acc",
+   "question": "What accuracy does the CRAG retrieval evaluator reach in the paper's evaluation table?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      9
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "84.3"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "crag-algo",
+   "question": "Which algorithm does CRAG use to strip redundant content from retrieved documents?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      1,
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "decompose-then-recompose"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "crag-web",
+   "question": "What does CRAG fall back on when the retrieved documents are judged incorrect or ambiguous?",
+   "category": "paraphrase",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "web search"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "crag-actions",
+   "question": "What are the three retrieval actions CRAG can trigger?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Correct"
+    ],
+    [
+     "Incorrect"
+    ],
+    [
+     "Ambiguous"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "cmp-reflect",
+   "question": "Which approach relies on special reflection tokens: RAG, Self-RAG or CRAG?",
+   "category": "comparison",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2310.11511-Self-RAG",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Self-RAG",
+     "SELF-RAG",
+     "SELFRAG"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "cmp-evaluator",
+   "question": "Which of these papers introduces a lightweight retrieval evaluator?",
+   "category": "comparison",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "arxiv-2401.15884-CRAG",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "CRAG",
+     "Corrective"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-0",
+   "question": "What is the price per million tokens of the Self-RAG critic model API?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-1",
+   "question": "Which vector database version did the original RAG paper deploy in production?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-2",
+   "question": "How many GPUs did the CRAG authors use for web search caching?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  }
+ ]
+}

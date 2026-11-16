@@ -1,0 +1,26 @@
+{
+ "name": "open-arxiv",
+ "files": [
+  {
+   "file": "../../data/raw/open/arxiv-2005.11401-RAG-Lewis.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/open/arxiv-2310.11511-Self-RAG.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/open/arxiv-2401.15884-CRAG.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  }
+ ]
+}
