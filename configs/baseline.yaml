@@ -1,0 +1,30 @@
+# Re-implementation of the ORIGINAL template's recipe, so we can measure it with the same harness.
+#   fixed word-window chunks (2048 chars / 64 overlap), dense + BM42 hybrid, no rerank (the template used
+#   Cohere, which needs a key), no parent-child, no contextualisation, no rewrite/decompose/router,
+#   answer from whatever was retrieved (no grounding check / abstention / corrective loop).
+description: "Template recipe: fixed chunks + hybrid dense/BM42 + plain top-k"
+embedding:
+  dense_model: BAAI/bge-small-en-v1.5      # template used mxbai-embed-large (1.3GB torch); small ONNX model keeps this runnable here
+  sparse_model: Qdrant/bm42-all-minilm-l6-v2-attentions
+chunking:
+  strategy: fixed_words
+  size: 2048
+  overlap: 64
+  parent_child: false
+  keep_tables_whole: false
+  contextual: false
+  add_doc_title: true
+retrieval:
+  mode: hybrid
+  top_k: 20
+  fusion: rrf
+  rerank: {enabled: false}
+  parent_expand: false
+  final_k: 8
+  rewrite_with_history: false
+  decompose: false
+  router: false
+generation:
+  verify_grounding: false
+  abstain_below: null
+  corrective: false
