@@ -66,7 +66,8 @@ def create_app(env: Env | None = None, profile: Profile | None = None, *, store:
     async def lifespan(app: FastAPI):
         prof = profile or load_profile()
         st = store or QdrantStore(env, prof)
-        gw = llm or LLMGateway(mock=env.llm.mock, num_retries=env.llm.num_retries, drop_params=env.llm.drop_params)
+        gw = llm or LLMGateway(mock=env.llm.mock, num_retries=env.llm.num_retries, drop_params=env.llm.drop_params,
+                                         mock_delay_ms=env.llm.mock_delay_ms)
         retr = Retriever(st, prof, gw)
         app.state.update = dict(env=env, profile=prof, store=st, llm=gw, retriever=retr,
                                 answerer=Answerer(retr, prof, gw), ingestor=Ingestor(st, prof, gw),

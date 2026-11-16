@@ -7,6 +7,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -61,8 +62,9 @@ def _approx_tokens(s: str) -> int:
 
 class LLMGateway:
     def __init__(self, *, mock: bool = False, mock_handler: MockHandler | None = None,
-                 num_retries: int = 3, drop_params: bool = True):
+                 num_retries: int = 3, drop_params: bool = True, mock_delay_ms: int = 0):
         self.mock = mock
+        self.mock_delay_s = mock_delay_ms / 1000.0  # demo realism: pause between streamed pieces
         self._handler = mock_handler
         self.num_retries = num_retries
         self.drop_params = drop_params
@@ -110,6 +112,8 @@ class LLMGateway:
             out = (self._handler or default_mock_handler)(task, prompt)
             # emit word-sized pieces so the UI path is exercised realistically
             for piece in re.findall(r"\S+\s*|\s+", out):
+                if self.mock_delay_s:
+                    await asyncio.sleep(self.mock_delay_s)
                 yield piece
             self.usage.add(task, _approx_tokens(prompt), _approx_tokens(out), time.perf_counter() - t0)
             return

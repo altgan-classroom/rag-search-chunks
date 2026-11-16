@@ -124,6 +124,7 @@ class LLMEnv(BaseModel):
     """Provider keys are read by LiteLLM from the standard env vars (ANTHROPIC_API_KEY, OPENAI_API_KEY, ...).
     `mock` makes every LLM call deterministic and offline (tests, CI, keyless demos)."""
     mock: bool = False
+    mock_delay_ms: int = 0  # demo: delay between streamed mock tokens so progressive rendering is visible
     drop_params: bool = True
     num_retries: int = 3
 

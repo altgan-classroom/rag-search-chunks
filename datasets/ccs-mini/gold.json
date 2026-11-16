@@ -1,0 +1,1301 @@
+{
+ "name": "ccs-mini",
+ "description": "CCS documents <= 30 pages (see datasets/ccs/build_mini.py).",
+ "questions": [
+  {
+   "id": "ccs1-cost",
+   "question": "What is the total well cost of injection well CCS1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "6.6 million"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-rig",
+   "question": "Which drilling company drilled the CCS1 injection well?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Les Wilson"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-pmax",
+   "question": "What is the maximum wellhead pressure allowed by the CCS1 permit?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1950 psig",
+     "1,950 psig"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-rate",
+   "question": "What injection rate range does the CCS1 permit allow?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "14.1 tonnes per hour"
+    ],
+    [
+     "49.7"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-daily",
+   "question": "What is the maximum amount of CO2 that may be injected per day into CCS1?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1,200 tonnes per day"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-perf",
+   "question": "Between which depths is the CCS1 well perforated?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "6,982"
+    ],
+    [
+     "7,012"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-sigma",
+   "question": "How often must a temperature survey and time-lapse sigma log be run on CCS1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "24 months"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-annulus",
+   "question": "What minimum annulus pressure must be maintained on CCS1?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "400 psi"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-gauge",
+   "question": "At what measured depth is the CCS1 pressure/temperature gauge mounted?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "6,325 ft"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-packer",
+   "question": "What type of packer is installed in CCS1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Q-Max",
+     "QUANTUM MAX"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-cement",
+   "question": "What cement system was used between 4,170 and 7,219 ft in CCS1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "EverCRETE"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ccs1-dts",
+   "question": "How often along the fibre does the CCS1 distributed temperature sensing cable measure temperature?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1.624 ft"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "vw1-cost",
+   "question": "What was the total well cost of verification well VW1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "4.4 million"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "vw1-westbay",
+   "question": "Which multilevel monitoring system was installed in VW1 between 2010 and 2017?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Westbay"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "vw1-packers",
+   "question": "How many inflatable packers did the Westbay system in VW1 use for zonal isolation?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "28 inflatable packers",
+     "28"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "vw1-mit",
+   "question": "How often is the internal and external mechanical integrity test required for VW1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "5 years"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "vw1-eauclaire",
+   "question": "What is the formation top depth of the Eau Claire in VW1?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "5,010"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "cmp-cost",
+   "question": "Which well cost more to drill, CCS1 or VW1?",
+   "category": "comparison",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    },
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "CCS1"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "gm1-cost",
+   "question": "What was the total well cost of geophysical monitoring well GM1?",
+   "category": "conflicting",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    },
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet-Alt",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "504,000",
+     "4.0 million"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": "the two GM1 sheets disagree (~$504,000 vs ~4.0 million): ideal answers flag the conflict"
+  },
+  {
+   "id": "gm1-sources",
+   "question": "How many source points were acquired in the 2013 3D VSP at GM1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet-Alt",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "557"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "gm1-fluid",
+   "question": "What drilling fluid was used in the final section of GM1?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    },
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet-Alt",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "WBM",
+     "water based mud"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "gm1-cement",
+   "question": "How many sacks of Franklin cement were run in the final section of GM1?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    },
+    {
+     "doc": "1211523438_20140708_GM1_Well_Summary_Sheet-Alt",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "920"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-start",
+   "question": "When did injection start at the Illinois Basin - Decatur Project?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      1,
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "November 17, 2011"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-volume",
+   "question": "What total volume of CO2 was injected at IBDP?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "999,215 tonnes"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-seal",
+   "question": "At what depth is the top of the Eau Claire seal at IBDP according to the fact sheet?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "5,047 ft"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-whp",
+   "question": "What wellhead injection pressure did the IBDP fact sheet report?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1,350 psi"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-pipe",
+   "question": "How long is the delivery pipeline at IBDP?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1.2 mile"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-holder",
+   "question": "Who holds the UIC injection permit for IBDP?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Archer Daniels Midland"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "ibdp-thick",
+   "question": "What is the thickness of the Mount Simon reservoir in the IBDP fact sheet?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1,506 ft"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "def-mva",
+   "question": "What does MVA stand for in the context of IBDP?",
+   "category": "definition",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP_FactSheet_2015_Final_sm",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Monitoring, Verification, and Accounting"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "fin-instr",
+   "question": "Which financial instruments does USEPA recommend for Class VI financial responsibility?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Financial-Assurance-fact-sheet2",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "trust fund"
+    ],
+    [
+     "surety bond"
+    ],
+    [
+     "letter of credit"
+    ],
+    [
+     "escrow"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "fin-cfr",
+   "question": "Under which federal regulation did USEPA publish the Class VI requirements in 2010?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Financial-Assurance-fact-sheet2",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "40 CFR 146"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "terms-sell",
+   "question": "May the IBDP CO2 injection datasets be sold?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP - CO2 DataShare Terms Final",
+     "pages": [
+      1,
+      3
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "may not sell"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "terms-cc",
+   "question": "Which license is the IBDP CO2 injection datasets license based on?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "IBDP - CO2 DataShare Terms Final",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "CC BY 4.0"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "mit-date",
+   "question": "On what date was the RST run in CCS #1 for the July 2013 mechanical integrity report?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20130700_CCS1_Periodic_Report_Mechanical_Integrity_bb",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "July 12, 2013"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "mit-depth",
+   "question": "To what depth had CO2 in the formation migrated according to the July 2013 RST analysis?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20130700_CCS1_Periodic_Report_Mechanical_Integrity_bb",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "6750"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "def-rst",
+   "question": "What does the RST used for mechanical integrity monitoring in CCS #1 stand for?",
+   "category": "definition",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20130700_CCS1_Periodic_Report_Mechanical_Integrity_bb",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "Reservoir Saturation Tool"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "fu-cost",
+   "question": "What is its total well cost?",
+   "category": "follow_up",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "6.6 million"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [
+    [
+     "user",
+     "Tell me about the CCS1 injection well."
+    ],
+    [
+     "assistant",
+     "CCS1 is the injection well of the Midwest Geological Sequestration Consortium."
+    ]
+   ],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "fu-pmax",
+   "question": "And what is its maximum wellhead pressure?",
+   "category": "follow_up",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523415_20191113_CCS1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1,950"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [
+    [
+     "user",
+     "Tell me about the CCS1 injection well."
+    ],
+    [
+     "assistant",
+     "CCS1 is the injection well of the Midwest Geological Sequestration Consortium."
+    ]
+   ],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "fu-vw1",
+   "question": "How often is its mechanical integrity test required?",
+   "category": "follow_up",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "1211523460_20200916_VW1_Well_Summary_Sheet",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "5 years"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [
+    [
+     "user",
+     "What can you tell me about VW1?"
+    ],
+    [
+     "assistant",
+     "VW1 is the verification well."
+    ]
+   ],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-0",
+   "question": "What was the price per tonne of CO2 purchased from ADM?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-1",
+   "question": "How many people were employed on the IBDP in 2015?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-2",
+   "question": "What is the brand of safety helmets used on the CCS1 drilling rig?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-3",
+   "question": "What is the H2S content of the injected CO2 stream?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-4",
+   "question": "What was the total well cost of verification well VW2?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  },
+  {
+   "id": "unans-5",
+   "question": "Who is the chief executive officer of Schlumberger Carbon Services?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "model_authored",
+   "status": "needs_review",
+   "notes": ""
+  }
+ ]
+}

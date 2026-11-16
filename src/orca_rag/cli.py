@@ -122,6 +122,12 @@ def cmd_sweep(a):
     return 0
 
 
+def cmd_compare(a):
+    from .eval.compare import ladder_markdown
+    print(ladder_markdown(a.dir, skip=tuple(a.skip.split(",")) if a.skip else ()))
+    return 0
+
+
 def cmd_stats(a):
     _, _, store = _store(a.profile)
     print(json.dumps({**store.health(), **store.stats()}, indent=1))
@@ -142,6 +148,7 @@ def main(argv=None):
     p.add_argument("--generate", action="store_true"); p.add_argument("--ci", action="store_true"); p.add_argument("--out"); p.set_defaults(fn=cmd_ablate)
     p = sub.add_parser("sweep"); p.add_argument("dataset"); p.add_argument("--experiment", default="all", choices=["models", "size", "overlap", "strategy", "retrieval", "all"])
     p.add_argument("--models"); p.add_argument("--only"); p.add_argument("--out"); p.set_defaults(fn=cmd_sweep)
+    p = sub.add_parser("compare"); p.add_argument("dir"); p.add_argument("--skip", default=""); p.set_defaults(fn=cmd_compare)
     p = sub.add_parser("stats"); p.set_defaults(fn=cmd_stats)
     a = ap.parse_args(argv)
     logging.basicConfig(level=get_env().log_level, format="%(levelname)s %(name)s: %(message)s")

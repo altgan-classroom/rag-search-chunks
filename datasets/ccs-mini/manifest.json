@@ -1,0 +1,96 @@
+{
+ "name": "ccs-mini",
+ "files": [
+  {
+   "file": "../../data/raw/ccs/1211523415_20190529_CCS1_Well_Integrity_Report_with_PNX_20190306.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/1211523415_20130700_CCS1_Periodic_Report_Mechanical_Integrity_bb.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/1211523415_20191113_CCS1_Well_Summary_Sheet.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/1211523438_20140708_GM1_Well_Summary_Sheet.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/1211523438_20140708_GM1_Well_Summary_Sheet-Alt.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/1211523460_20200916_VW1_Well_Summary_Sheet.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/MGSC_20120500_Risk_Status_Report_V2.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/MGSC_20120530_Topical_Report_CO2_Injectivity_Storage_Capacity_Plume_Size.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/IBDP Phase 4 Geomechanics Report 4_5_15 Final.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/IBDP_FactSheet_2015_Final_sm.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/Financial-Assurance-fact-sheet2.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/IBDP - CO2 DataShare Terms Final.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "../../data/raw/ccs/FAQs_Flyer_Blue_final_cropped.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  }
+ ]
+}

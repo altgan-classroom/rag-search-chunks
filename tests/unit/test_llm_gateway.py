@@ -40,3 +40,12 @@ async def test_stream_mock_yields_pieces():
 
 def test_default_handler_no_sources_abstains():
     assert "could not find" in default_mock_handler("generate", "<sources>\n</sources>").lower()
+
+
+async def test_mock_stream_delay_spreads_pieces_over_time():
+    import time
+    g = LLMGateway(mock=True, mock_handler=lambda t, p: "a b c d e", mock_delay_ms=20)
+    t0, stamps = time.perf_counter(), []
+    async for _ in g.stream("p", model="x"):
+        stamps.append(time.perf_counter() - t0)
+    assert len(stamps) == 5 and stamps[-1] - stamps[0] >= 0.06
