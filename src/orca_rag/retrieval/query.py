@@ -42,16 +42,18 @@ def heuristic_route(q: str) -> str:
 
 
 _PRONOUN = re.compile(r"\b(it|its|it's|that|this|they|their|them|those|these|the same|there)\b", re.I)
-_IDENT = re.compile(r"\b[A-Z]{1,5}-\d{2,}(?:-\d+)?\b")
+_IDENT = re.compile(r"\b[A-Z]{1,5}-\d{2,}(?:-\d+)?\b|\b[A-Z]{2,5}\d{1,3}\b")  # MB-107, INC-2019-0447, CCS1, VW1
+_NOT_IDS = {"CO2", "H2S", "CH4", "N2", "O2", "SO2", "NO2", "H2O", "PS3"}  # chemistry, not entities
 
 
 def heuristic_carryover(question: str, history: list[tuple[str, str]]) -> str:
     """Keyless fallback: if the question has a pronoun but no identifier, append the most recent identifier from the
     user's earlier turns ("What is its total depth?" + "tell me about MB-107" -> "... (regarding MB-107)")."""
-    if _IDENT.search(question) or not _PRONOUN.search(question):
+    ids = lambda t: [i for i in _IDENT.findall(t) if i not in _NOT_IDS]
+    if ids(question) or not _PRONOUN.search(question):
         return question
     for role, text in reversed(history):
-        if role == "user" and (m := _IDENT.findall(text)):
+        if role == "user" and (m := ids(text)):
             return f"{question.rstrip('?')} (regarding {m[-1]})?"
     return question
 

@@ -58,12 +58,8 @@ def fmt(n: int) -> str:
 
 
 def make_pdf(path: Path, html: str) -> None:
-    doc = pymupdf.open()
-    page = doc.new_page()
-    # Story flows across pages automatically
+    """Flow HTML (headings, tables, paragraphs) across as many A4 pages as needed."""
     story = pymupdf.Story(html=f"<html><body>{html}</body></html>", user_css=CSS)
-    doc.close()
-    doc = pymupdf.open()
     writer = pymupdf.DocumentWriter(str(path))
     mediabox = pymupdf.paper_rect("a4")
     where = mediabox + (50, 50, -50, -50)

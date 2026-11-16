@@ -1,5 +1,5 @@
 from orca_rag.config.settings import ChunkingCfg
-from orca_rag.ingestion.chunkers import chunk_document, chunk_fixed_words, chunk_structure, count_tokens
+from orca_rag.ingestion.chunkers import chunk_document, chunk_fixed_words, chunk_structure
 from orca_rag.ingestion.models import Page, ParsedDocument
 from orca_rag.ingestion.parsers import strip_running_lines, text_quality
 

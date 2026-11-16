@@ -126,8 +126,6 @@ async def eval_question(q: GoldQuestion, retriever: Retriever, answerer: Answere
         m["abstain_correct"] = float(abst == (not q.answerable))
         if q.answerable and q.must_contain:
             m["answer_correct_kw"] = float(contains_all(ans, q.must_contain))
-        ctx_ev = next((json.loads(e["text"]) for e in events if e["type"] == "context"), {})
-        cited = [(v["doc_name"], v.get("page_num")) for v in ctx_ev.values()]
         srcs = build_sources(ret.hits, 10_000)
         if ans and not abst and srcs:
             g = check_grounding(ans, srcs)

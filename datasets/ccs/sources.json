@@ -1,0 +1,92 @@
+{
+ "repo": "Altgan/rag-for-unstructured-data",
+ "revision": "e260a3a840a06dc6008f20e536d7ff65ede51f59",
+ "license": "apache-2.0",
+ "files": [
+  {
+   "file": "1211523415_20090507_CCS1_Well_Completion_Report.pdf",
+   "bytes": 1536309,
+   "sha256": "1d2dfa027bee06a694710dc792fa407f676fa3d6a663cd788849114067c9254e"
+  },
+  {
+   "file": "1211523415_20190529_CCS1_Well_Integrity_Report_with_PNX_20190306.pdf",
+   "bytes": 1821524,
+   "sha256": "4dfb8586727a7681947a016ffddb1449273fe37074d2b3ba6ab23a83e8fbedee"
+  },
+  {
+   "file": "1211523415_20130700_CCS1_Periodic_Report_Mechanical_Integrity_bb.pdf",
+   "bytes": 393949,
+   "sha256": "9981616534571a85328b655c84253d19802a8a2b243be4efb9fc6e15ada02dae"
+  },
+  {
+   "file": "1211523415_20121005_CCS1_Ambient_Falloff_Test_Report.pdf",
+   "bytes": 4955971,
+   "sha256": "2f93864d9661dbe41102e4a9ca5e537af6f60904e742ce772568f1be2c929d4f"
+  },
+  {
+   "file": "1211523415_20130607_CCS1_Ambient_Falloff_Test_Report.pdf",
+   "bytes": 3930416,
+   "sha256": "eb167cd26b488784aa31a9b9c669b628cb06ff06039a44ab408a8007338ae8a7"
+  },
+  {
+   "file": "1211523415_20191113_CCS1_Well_Summary_Sheet.pdf",
+   "bytes": 712676,
+   "sha256": "df588fd72c6ba0b464f2354dae069513971d15a433b61d42e3f0ac4997134160"
+  },
+  {
+   "file": "1211523438_20140708_GM1_Well_Summary_Sheet.pdf",
+   "bytes": 1975501,
+   "sha256": "7aa51dbb5326a2b50719f0f518d27d7f0c10ad0764f842f9b5d9b7dc8746f52f"
+  },
+  {
+   "file": "1211523438_20140708_GM1_Well_Summary_Sheet-Alt.pdf",
+   "bytes": 504047,
+   "sha256": "a83bba6d0565ad8b74efd07bd7faebc444fa6f2836c1d045bda9f2dde127596f"
+  },
+  {
+   "file": "1211523460_20200916_VW1_Well_Summary_Sheet.pdf",
+   "bytes": 1044119,
+   "sha256": "caf58cfa89ffa71e83b52ea3ca55f53a08d8b4867dc373317dd8cfbd38f9a18e"
+  },
+  {
+   "file": "IBDP_20151217_Risk_Management_Report_FINAL.pdf",
+   "bytes": 1041911,
+   "sha256": "f58d1d122599a40ddfa57a24d3ec3269c94db805a5612bb9fc9aacd5728ff2d2"
+  },
+  {
+   "file": "MGSC_20120500_Risk_Status_Report_V2.pdf",
+   "bytes": 1326851,
+   "sha256": "70123a487e58a3fa94689e7fcbb231effe062a9f2bc92a061f3c1912c2845e70"
+  },
+  {
+   "file": "MGSC_20120530_Topical_Report_CO2_Injectivity_Storage_Capacity_Plume_Size.pdf",
+   "bytes": 3003512,
+   "sha256": "f0e904787706ec34b4c1ab89b8be590cbca79129b51b69931ad39b247e30356a"
+  },
+  {
+   "file": "IBDP Phase 4 Geomechanics Report 4_5_15 Final.pdf",
+   "bytes": 2140937,
+   "sha256": "c9349026aeda3f08d4c4e2f2031f391c7fcd65e739dda373fff8043581504892"
+  },
+  {
+   "file": "IBDP_FactSheet_2015_Final_sm.pdf",
+   "bytes": 1575123,
+   "sha256": "b66d2e1a5113e0783c5ee866de05b6ed2b90b5fdd4e06eda5fb9a92743b28414"
+  },
+  {
+   "file": "Financial-Assurance-fact-sheet2.pdf",
+   "bytes": 1140316,
+   "sha256": "d3468a700e2e8f4263750a90079f0250680e23e66d65ee4aee17cc662647b820"
+  },
+  {
+   "file": "IBDP - CO2 DataShare Terms Final.pdf",
+   "bytes": 256865,
+   "sha256": "acab481e01d9db11c5f96e0ccf1c6bbae222eb3448dfa2ef771f5fdc81624014"
+  },
+  {
+   "file": "FAQs_Flyer_Blue_final_cropped.pdf",
+   "bytes": 7853881,
+   "sha256": "e8d258e6c1cce7b5723d3396a4d3ce858704181decd39e7af1b15f21c0b90a05"
+  }
+ ]
+}

@@ -1,7 +1,6 @@
 """Retrieval + agentic generation end-to-end on the embedded engine with offline components."""
 import json
 
-import pytest
 from qdrant_client import QdrantClient
 
 from orca_rag.config.settings import (ChunkingCfg, EmbeddingCfg, Env, GenerationCfg, Profile, RerankCfg, RetrievalCfg)
@@ -162,3 +161,12 @@ async def test_rerank_blend_keeps_first_stage_evidence_visible():
     prof, store, llm = build(dict(retrieval=RetrievalCfg(rerank=RerankCfg(enabled=True, model="lexical", top_n=6, blend=0.5), final_k=4)))
     r = await Retriever(store, prof, llm).retrieve("What was the max pressure of CCS1?", P)
     assert r.hits and any(s.name == "rerank" for s in r.trace)
+
+
+def test_heuristic_carryover_handles_ids_without_hyphen_and_ignores_chemistry():
+    from orca_rag.retrieval.query import heuristic_carryover as h
+    hist = [("user", "Tell me about the CCS1 injection well and its CO2 stream.")]
+    assert h("What is its total well cost?", hist) == "What is its total well cost (regarding CCS1)?"
+    assert h("What is the cost of VW1?", hist) == "What is the cost of VW1?"      # already has an identifier
+    assert h("List the packers.", hist) == "List the packers."                    # no pronoun: untouched
+    assert h("What is it?", [("user", "hello")]) == "What is it?"                 # nothing to carry over

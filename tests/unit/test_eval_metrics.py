@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from orca_rag.eval.metrics import bootstrap_ci, contains_all, is_abstention, norm, retrieval_scores, hit_matches
+from orca_rag.eval.metrics import bootstrap_ci, contains_all, is_abstention, retrieval_scores, hit_matches
 from orca_rag.eval.schema import GoldQuestion, GoldRef, GoldSet
 from orca_rag.store.qdrant_store import Hit
 

@@ -1,6 +1,0 @@
-openai
-fuzzywuzzy
-python-dotenv
-pandas
-requests
-openpyxl

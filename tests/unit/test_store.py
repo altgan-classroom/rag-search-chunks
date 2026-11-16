@@ -1,5 +1,4 @@
 """Qdrant behaviour on the embedded local engine: idempotency, ACL isolation, hybrid, deletes."""
-import pytest
 from qdrant_client import QdrantClient
 
 from orca_rag.config.settings import Env, Profile, EmbeddingCfg
