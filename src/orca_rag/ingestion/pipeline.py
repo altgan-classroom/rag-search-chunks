@@ -20,7 +20,7 @@ from ..store.qdrant_store import PUBLIC, QdrantStore, point_id
 from .chunkers import chunk_document
 from .enrich import contextualize, extract_doc_meta
 from .models import PARSER_VERSION, ParsedDocument
-from .parsers import parse_file
+from .parsers import parse_cached
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,10 @@ def recipe_signature(profile: Profile) -> str:
 
 
 class Ingestor:
-    def __init__(self, store: QdrantStore, profile: Profile, llm: LLMGateway | None = None):
+    def __init__(self, store: QdrantStore, profile: Profile, llm: LLMGateway | None = None,
+                 parse_cache: str | Path | None = None):
         self.store, self.profile, self.llm = store, profile, llm
+        self.parse_cache = parse_cache or (store.env.data_dir / "parsed")
 
     def ingest_file(self, path: str, *, tenant: str = "default", acl: list[str] | None = None, force: bool = False,
                     parsed: ParsedDocument | None = None, **parse_kw) -> IngestReport:
@@ -57,7 +59,7 @@ class Ingestor:
         source_key = Path(path).name
         rep = IngestReport(source_key=source_key, status="failed")
         try:
-            doc = parsed or parse_file(path, **parse_kw)
+            doc = parsed or parse_cached(path, self.parse_cache, **parse_kw)
             source_key = rep.source_key = doc.source_key  # the parsed document's key is authoritative
             rep.doc_id, rep.pages = doc.doc_id, len(doc.pages)
             rep.pages_skipped = sum(p.skipped for p in doc.pages)

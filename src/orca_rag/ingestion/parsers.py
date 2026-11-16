@@ -21,12 +21,26 @@ _TOK = re.compile(r"\S+")
 SUPPORTED = {".pdf", ".md", ".txt", ".html", ".htm"}
 
 
+_NUM = re.compile(r"\$?-?\d[\d,.]*%?")
+_ID = re.compile(r"[A-Za-z]+[-_]?\d[\w\-]*|\d+[-/]\d[\d\-/,.]*|[A-Za-z]{2,}-[A-Za-z0-9\-]+")
+_TWO = set("an as at be by do go he if in is it me my no of on or so to up us we ft in mm cm km ml mg kg ph id ok vs tv"
+           " co ca ct al ar az ga il in ks ky la md mi mn mo ms mt nc nd ne nh nj nm nv ny oh ok or pa ri sc sd tn tx ut va vt wa wi wv wy".split())
+
+
+def _good(t: str) -> bool:
+    t = t.strip(".,;:()[]\"'")
+    if not t:
+        return False
+    return bool(_NUM.fullmatch(t) or re.fullmatch(r"[A-Za-z]{3,}", t) or t.lower() in _TWO or _ID.fullmatch(t))
+
+
 def text_quality(md: str) -> float:
+    """Share of tokens that look like real content: words, numbers/currency/percentages, identifiers (MB-107).
+    Table scaffolding is ignored. OCR garbage (stray symbols, invented 2-letter 'words') scores near 0, while a
+    numeric table scores high; counting only alphabetic words wrongly rejected production tables."""
+    md = re.sub(r"\|[-: |]+\|?|[|*_#`]", " ", md)
     toks = _TOK.findall(md)
-    if not toks:
-        return 0.0
-    words = sum(1 for t in toks if _WORD.fullmatch(t.strip(".,;:()[]\"'|*_#-")))
-    return words / len(toks)
+    return (sum(map(_good, toks)) / len(toks)) if toks else 0.0
 
 
 def _norm_line(line: str) -> str:
@@ -64,8 +78,9 @@ def _clean(md: str) -> str:
     return md.strip()
 
 
-def parse_pdf(path: str, *, ocr: bool = True, max_pages: int | None = None, min_quality: float = 0.35,
-              page_numbers: list[int] | None = None) -> ParsedDocument:
+def parse_pdf_raw(path: str, *, ocr: bool = True, max_pages: int | None = None,
+                  page_numbers: list[int] | None = None) -> tuple[list[Page], dict]:
+    """Expensive step (layout analysis + OCR). Output is cacheable; gating/cleanup is applied afterwards by `_finish`."""
     import pymupdf
     import pymupdf4llm
 
@@ -77,6 +92,11 @@ def parse_pdf(path: str, *, ocr: bool = True, max_pages: int | None = None, min_
     chunks = pymupdf4llm.to_markdown(path, page_chunks=True, pages=idx, show_progress=False, **kwargs)
     pages = [Page(number=int(c["metadata"].get("page_number", i + 1)), markdown=_clean(c["text"]))
              for i, c in zip(idx, chunks)]
+    return pages, meta
+
+
+def parse_pdf(path: str, **kw) -> ParsedDocument:
+    pages, meta = parse_pdf_raw(path, **kw)
     return _finish(path, pages, meta)
 
 
@@ -112,3 +132,29 @@ def parse_file(path: str, **kw) -> ParsedDocument:
     if ext not in SUPPORTED:  # reject up front instead of failing + retrying inside a worker (baseline I11)
         raise ValueError(f"unsupported file type {ext!r}; supported: {sorted(SUPPORTED)}")
     return parse_pdf(path, **kw) if ext == ".pdf" else parse_text(path)
+
+
+RAW_CACHE_VERSION = "r1"
+
+
+def parse_cached(path: str, cache_dir: str | Path | None, **kw) -> ParsedDocument:
+    """Cache the *raw* layout/OCR output per (content sha, options). Header/footer stripping, quality gating and
+    cleanup are cheap and re-applied on every load, so improving them never forces a re-OCR, and re-chunking or
+    re-embedding for a new recipe skips OCR entirely (the dominant cost on scanned PDFs)."""
+    import hashlib
+    import json
+
+    if cache_dir is None or Path(path).suffix.lower() != ".pdf":
+        return parse_file(path, **kw)
+    sha = sha256_file(path)
+    opt = hashlib.sha1(json.dumps(kw, sort_keys=True, default=str).encode()).hexdigest()[:8]
+    f = Path(cache_dir) / f"{sha[:16]}_{RAW_CACHE_VERSION}_{opt}.json"
+    if f.exists():
+        d = json.loads(f.read_text())
+        pages = [Page(number=p["number"], markdown=p["markdown"]) for p in d["pages"]]
+        meta = d["meta"]
+    else:
+        pages, meta = parse_pdf_raw(path, **kw)
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(json.dumps({"meta": meta, "pages": [{"number": p.number, "markdown": p.markdown} for p in pages]}))
+    return _finish(path, pages, meta)

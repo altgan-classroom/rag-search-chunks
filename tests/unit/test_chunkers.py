@@ -86,3 +86,9 @@ def test_running_header_footer_removed():
 def test_text_quality_flags_ocr_garbage():
     assert text_quality("The injection well was completed in the Mt. Simon Sandstone formation.") > 0.8
     assert text_quality("!| | aa fr | | 1 | ' {] [| [] [| 9 LJ [] f] ud") < 0.3
+
+
+def test_numeric_table_is_not_mistaken_for_garbage():
+    tbl = "|Month|MB-107|MB-104|\n|---|---|---|\n" + "\n".join(f"|Month{i}|{1200 + i},{300 + i}|{900 + i}|" for i in range(12))
+    assert text_quality(tbl) > 0.8
+    assert text_quality("$1,250 12.5% 7,000 ft 1,520 psi") > 0.8

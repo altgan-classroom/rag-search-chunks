@@ -53,6 +53,8 @@ class RerankCfg(BaseModel):
     model: str = "Xenova/ms-marco-MiniLM-L-12-v2"
     top_n: int = 8
     min_score: float | None = None  # applied AFTER rerank, on the reranker's own scale
+    candidates: int = 24  # first-stage results sent to the cross-encoder (latency is linear in this)
+    blend: float = Field(0.0, ge=0.0, le=1.0)  # 0 = reranker order only; >0 fuses with first-stage order (RRF weight)
 
 
 class RetrievalCfg(BaseModel):

@@ -41,9 +41,26 @@ def heuristic_route(q: str) -> str:
     return "decompose" if _COMPOUND.search(q) else "retrieve"
 
 
-async def rewrite_with_history(llm: LLMGateway, model: str, question: str, history: list[tuple[str, str]]) -> str:
-    if not history or not llm.available:
+_PRONOUN = re.compile(r"\b(it|its|it's|that|this|they|their|them|those|these|the same|there)\b", re.I)
+_IDENT = re.compile(r"\b[A-Z]{1,5}-\d{2,}(?:-\d+)?\b")
+
+
+def heuristic_carryover(question: str, history: list[tuple[str, str]]) -> str:
+    """Keyless fallback: if the question has a pronoun but no identifier, append the most recent identifier from the
+    user's earlier turns ("What is its total depth?" + "tell me about MB-107" -> "... (regarding MB-107)")."""
+    if _IDENT.search(question) or not _PRONOUN.search(question):
         return question
+    for role, text in reversed(history):
+        if role == "user" and (m := _IDENT.findall(text)):
+            return f"{question.rstrip('?')} (regarding {m[-1]})?"
+    return question
+
+
+async def rewrite_with_history(llm: LLMGateway, model: str, question: str, history: list[tuple[str, str]]) -> str:
+    if not history:
+        return question
+    if not llm.available or llm.mock:
+        return heuristic_carryover(question, history)
     h = "\n".join(f"{r}: {t[:400]}" for r, t in history[-6:])
     try:
         out = (await llm.complete(REWRITE.format(history=h, question=question), model=model, task="rewrite",

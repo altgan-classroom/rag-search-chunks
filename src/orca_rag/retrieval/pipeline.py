@@ -100,11 +100,18 @@ class Retriever:
 
         # 5. rerank --------------------------------------------------------------------------
         best = None
-        cand = fused[: max(cfg.rerank.top_n * 4, cfg.final_k * 3, 20)]
+        cand = fused[: max(cfg.rerank.candidates, cfg.final_k)]
         if cfg.rerank.enabled and cand:
             t0 = time.perf_counter()
+            first_stage = list(cand)
             cand = await loop.run_in_executor(None, self.reranker.rerank, query, cand, max(cfg.rerank.top_n, cfg.final_k))
-            best = cand[0].score if cand else None
+            best = cand[0].score if cand else None  # raw reranker score (kept for abstention) before any blending
+            if cfg.rerank.blend > 0 and cand:
+                # the reranker must not be able to veto first-stage evidence outright: fuse both orders
+                b = cfg.rerank.blend
+                scores = {h.id: h.score for h in cand}
+                fused_b = rrf([cand, [h for h in first_stage if h.id in scores]], weights=[1 - b, b])
+                cand = [Hit(h.id, scores[h.id], h.text, h.payload) for h in fused_b]
             if cfg.rerank.min_score is not None:
                 cand = [h for h in cand if h.score >= cfg.rerank.min_score]
             step("rerank", t0, model=self.reranker.name, kept=len(cand), best=best)
@@ -114,7 +121,8 @@ class Retriever:
             t0 = time.perf_counter()
             vecs = np.array(self.store.dense.embed_docs([h.text for h in cand]), dtype=np.float32)
             qv = np.array(self.store.dense.embed_query(query), dtype=np.float32)
-            cand = mmr(cand, vecs, qv, cfg.mmr_lambda, cfg.final_k)
+            rel = np.array([h.score for h in cand], dtype=np.float32) if cfg.rerank.enabled else None
+            cand = mmr(cand, vecs, qv, cfg.mmr_lambda, cfg.final_k, relevance=rel)
             step("mmr", t0, lam=cfg.mmr_lambda, kept=len(cand))
         children = cand[: cfg.final_k]
 

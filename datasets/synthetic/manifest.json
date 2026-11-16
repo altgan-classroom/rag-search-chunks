@@ -1,0 +1,411 @@
+{
+ "name": "meridian-synthetic",
+ "files": [
+  {
+   "file": "corpus/WellSummary_MB-101.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-110.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-104.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-140.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-107.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-170.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-201.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-210.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-204.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-240.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-301.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-310.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-120.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-130.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-150.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-160.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-180.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-190.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-265.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-177.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-302.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-433.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-124.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-137.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-374.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-148.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-287.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-398.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-129.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-359.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-209.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-119.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-144.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-322.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-314.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/WellSummary_MB-135.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/FieldNotes_MB-120.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-104_RevA_2015-03.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-104_RevB_2016-09.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-201_RevA_2015-03.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-201_RevB_2016-09.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-310_RevA_2015-03.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-310_RevB_2016-09.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-150_RevA_2015-03.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/CompletionReport_MB-150_RevB_2016-09.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/MonthlyProduction_2021.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/MonthlyProduction_2022.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/OperatorDirectory.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Glossary.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/HSE_IncidentLog_2019.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/BasinGeologyOverview.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/HR_Compensation_2023.pdf",
+   "tenant": "acme",
+   "acl": [
+    "group:hr"
+   ]
+  },
+  {
+   "file": "corpus/BoardMinutes_Q2.pdf",
+   "tenant": "acme",
+   "acl": [
+    "group:board"
+   ]
+  },
+  {
+   "file": "corpus/GlobexWellSummary_MB-104.pdf",
+   "tenant": "globex",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/AnnualMonitoringReport_2019.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/AnnualMonitoringReport_2020.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/AnnualMonitoringReport_2021.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/AnnualMonitoringReport_2022.pdf",
+   "tenant": "acme",
+   "acl": [
+    "public"
+   ]
+  }
+ ]
+}

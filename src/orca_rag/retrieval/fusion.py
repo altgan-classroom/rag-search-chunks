@@ -17,13 +17,23 @@ def rrf(rankings: list[list[Hit]], k: int = 60, weights: list[float] | None = No
     return [Hit(i, s, best[i].text, best[i].payload) for i, s in sorted(score.items(), key=lambda x: -x[1])]
 
 
-def mmr(hits: list[Hit], vectors: np.ndarray, query_vec: np.ndarray, lam: float, k: int) -> list[Hit]:
-    """Maximal Marginal Relevance: trade relevance against redundancy with already-selected chunks."""
+def mmr(hits: list[Hit], vectors: np.ndarray, query_vec: np.ndarray | None, lam: float, k: int,
+        relevance: np.ndarray | None = None) -> list[Hit]:
+    """Maximal Marginal Relevance: trade relevance against redundancy with already-selected chunks.
+
+    `relevance` should be the *ranker's own* scores (e.g. cross-encoder, min-max normalised). Recomputing relevance
+    from dense cosine here would silently discard a better ranker's ordering (measured: it pushed the correct
+    document revision from rank 1 to rank 6). Falls back to cosine only when no scores are supplied."""
     if not hits:
         return []
     v = vectors / (np.linalg.norm(vectors, axis=1, keepdims=True) + 1e-9)
-    q = query_vec / (np.linalg.norm(query_vec) + 1e-9)
-    rel = v @ q
+    if relevance is not None:
+        rel = np.asarray(relevance, dtype=np.float32)
+        span = float(rel.max() - rel.min())
+        rel = (rel - rel.min()) / span if span > 1e-9 else np.ones_like(rel)
+    else:
+        q = query_vec / (np.linalg.norm(query_vec) + 1e-9)
+        rel = v @ q
     chosen: list[int] = []
     cand = list(range(len(hits)))
     while cand and len(chosen) < k:
