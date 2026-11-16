@@ -147,6 +147,7 @@ def default_mock_handler(task: str, prompt: str) -> str:
             return "I could not find this in the provided documents."
         parts = []
         for n, body in items[:3]:
+            body = re.sub(r"^\(.*?\)\n", "", body.strip())  # drop the "(doc, p.N | section)" header line
             sent = re.split(r"(?<=[.!?])\s+", body.strip().replace("\n", " "))[0][:300]
             parts.append(f"{sent} [{n}]")
         return " ".join(parts)
