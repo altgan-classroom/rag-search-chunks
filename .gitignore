@@ -15,6 +15,7 @@ downloads/
 eggs/
 .eggs/
 lib/
+!web/orca/src/lib/
 lib64/
 parts/
 sdist/
@@ -183,4 +184,4 @@ orca_env
 .cursor/
 output/
 .ruff_cache/
-.DS_Store
+.DS_Storereports/

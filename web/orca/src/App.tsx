@@ -119,7 +119,7 @@ export default function App() {
                       <>
                         <UserMessage text={livePending!.user} />
                         <AssistantMessage
-                          entry={{ bot: live.answer, citations: live.citations, related: live.related, mode: livePending!.mode }}
+                          entry={{ bot: live.answer, citations: live.citations, related: live.related, mode: livePending!.mode, grounding: live.grounding, trace: live.trace }}
                           state={live.status === "connecting" ? "connecting" : "streaming"}
                         />
                       </>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HttpError, isAbortError, streamChat } from "../lib/api";
-import type { ChatEntry, Mode, StreamChunk } from "../lib/types";
+import type { ChatEntry, Grounding, Mode, StreamChunk, Trace } from "../lib/types";
 
 export type StreamStatus = "idle" | "connecting" | "streaming";
 
@@ -16,6 +16,16 @@ export interface LiveState {
   answer: string;
   citations: string;
   related: string[];
+  grounding?: Grounding;
+  trace?: Trace;
+}
+
+function tryJson<T>(s: string): T | undefined {
+  try {
+    return JSON.parse(s) as T;
+  } catch {
+    return undefined;
+  }
 }
 
 const IDLE: LiveState = { status: "idle", pending: null, answer: "", citations: "", related: [] };
@@ -35,7 +45,7 @@ export function useChatStream(onFinish: (chatId: string, entry: ChatEntry) => vo
   const abortRef = useRef<AbortController | null>(null);
   const runRef = useRef(0);
   const frameRef = useRef<number | null>(null);
-  const acc = useRef({ answer: "", citations: "", related: [] as string[], gotFirst: false });
+  const acc = useRef({ answer: "", citations: "", related: [] as string[], gotFirst: false, grounding: undefined as Grounding | undefined, trace: undefined as Trace | undefined });
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
 
@@ -43,7 +53,7 @@ export function useChatStream(onFinish: (chatId: string, entry: ChatEntry) => vo
     frameRef.current = null;
     const a = acc.current;
     setLive((p) =>
-      p.pending ? { ...p, status: a.gotFirst ? "streaming" : p.status, answer: a.answer, citations: a.citations, related: [...a.related] } : p,
+      p.pending ? { ...p, status: a.gotFirst ? "streaming" : p.status, answer: a.answer, citations: a.citations, related: [...a.related], grounding: a.grounding, trace: a.trace } : p,
     );
   }, []);
 
@@ -76,6 +86,12 @@ export function useChatStream(onFinish: (chatId: string, entry: ChatEntry) => vo
         case "related":
           if (c.text) a.related.push(c.text);
           break;
+        case "grounding":
+          a.grounding = tryJson<Grounding>(c.text);
+          break;
+        case "trace":
+          a.trace = tryJson<Trace>(c.text);
+          break;
         default:
           return;
       }
@@ -92,7 +108,7 @@ export function useChatStream(onFinish: (chatId: string, entry: ChatEntry) => vo
       abortRef.current = controller;
       const run = ++runRef.current;
       cancelFrame();
-      acc.current = { answer: "", citations: "", related: [], gotFirst: false };
+      acc.current = { answer: "", citations: "", related: [], gotFirst: false, grounding: undefined, trace: undefined };
       const pending: PendingTurn = { chatId, user: message, mode };
       setLive({ ...IDLE, status: "connecting", pending });
 
@@ -116,6 +132,8 @@ export function useChatStream(onFinish: (chatId: string, entry: ChatEntry) => vo
         citations: a.citations,
         related: a.related,
         mode,
+        ...(a.grounding ? { grounding: a.grounding } : {}),
+        ...(a.trace ? { trace: a.trace } : {}),
         ...(stopped ? { stopped: true } : {}),
         ...(error ? { error } : {}),
       });

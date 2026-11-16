@@ -2,6 +2,7 @@ import { useState } from "react";
 import { parseSources } from "../lib/citations";
 import type { ChatEntry } from "../lib/types";
 import { Alert, Arrow, Check, Copy, Logo, Refresh } from "./icons";
+import { Insights } from "./Insights";
 import { Markdown } from "./Markdown";
 import { Sources } from "./Sources";
 
@@ -31,7 +32,7 @@ function Thinking() {
 }
 
 interface AssistantProps {
-  entry: Pick<ChatEntry, "bot" | "citations" | "related" | "stopped" | "error" | "mode">;
+  entry: Pick<ChatEntry, "bot" | "citations" | "related" | "stopped" | "error" | "mode" | "grounding" | "trace">;
   state: "connecting" | "streaming" | "done";
   isLast?: boolean;
   onAsk?: (q: string) => void;
@@ -79,6 +80,7 @@ export function AssistantMessage({ entry, state, isLast, onAsk, onRegenerate }: 
             </div>
           )}
           {!live && <Sources sources={sources} />}
+          {!live && <Insights grounding={entry.grounding} trace={entry.trace} />}
         </div>
 
         {!live && entry.bot && (
