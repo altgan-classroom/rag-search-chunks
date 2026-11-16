@@ -49,6 +49,28 @@ class HashDense:
         return self._vec(text)
 
 
+# (document prefix, query prefix) per model family, as documented by each model card. fastembed's ONNX models apply
+# none of these, and omitting them silently degrades exactly the models that need them (nomic, e5, arctic, ...), which
+# would make an embedding comparison unfair. bge-*-v1.5 treats its query instruction as optional, so it is NOT
+# auto-applied; set embedding.query_prefix explicitly to use it (the sweep measures both).
+_BGE_Q = "Represent this sentence for searching relevant passages: "
+MODEL_PREFIXES: list[tuple[str, tuple[str, str]]] = [
+    ("nomic-ai/nomic-embed-text", ("search_document: ", "search_query: ")),
+    ("intfloat/multilingual-e5", ("passage: ", "query: ")),
+    ("intfloat/e5", ("passage: ", "query: ")),
+    ("snowflake/snowflake-arctic-embed", ("", _BGE_Q)),
+    ("Qwen/Qwen3-Embedding", ("", "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: ")),
+    ("google/embeddinggemma", ("title: none | text: ", "task: search result | query: ")),
+]
+
+
+def resolve_prefixes(model: str, doc_prefix: str = "", query_prefix: str = "") -> tuple[str, str]:
+    """Explicit prefixes win; otherwise the model family's documented convention; otherwise none."""
+    if doc_prefix or query_prefix:
+        return doc_prefix, query_prefix
+    return next((p for k, p in MODEL_PREFIXES if model.startswith(k)), ("", ""))
+
+
 class FastEmbedDense:
     def __init__(self, model: str, doc_prefix: str = "", query_prefix: str = ""):
         from fastembed import TextEmbedding
@@ -56,7 +78,7 @@ class FastEmbedDense:
         self.name = model
         self._m = TextEmbedding(model_name=model)
         self.dim = len(next(iter(self._m.embed(["probe"]))))
-        self._dp, self._qp = doc_prefix, query_prefix
+        self._dp, self._qp = resolve_prefixes(model, doc_prefix, query_prefix)
 
     def embed_docs(self, texts):
         with _lock:

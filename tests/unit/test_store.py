@@ -63,3 +63,13 @@ def test_parent_points_not_searchable_but_fetchable():
     p = Principal("u", "a")
     assert all(h.payload["kind"] == "child" for h in s.search("packers", p))
     assert s.fetch_parents(["P1"], p)["P1"].text.startswith("FULL PARENT")
+
+
+def test_model_prefix_conventions():
+    from orca_rag.store.embedders import resolve_prefixes as r
+    assert r("nomic-ai/nomic-embed-text-v1.5") == ("search_document: ", "search_query: ")
+    assert r("intfloat/multilingual-e5-large") == ("passage: ", "query: ")
+    assert r("snowflake/snowflake-arctic-embed-s")[1].startswith("Represent this sentence")
+    assert r("BAAI/bge-small-en-v1.5") == ("", "")                          # optional for bge: not auto-applied
+    assert r("BAAI/bge-small-en-v1.5", query_prefix="Q: ") == ("", "Q: ")   # explicit always wins
+    assert r("nomic-ai/nomic-embed-text-v1.5", "D: ", "Q: ") == ("D: ", "Q: ")

@@ -65,7 +65,7 @@ def cmd_eval(a):
     gold = GoldSet.load(Path(a.dataset) / "gold.json")
     manifest = CorpusManifest.load(Path(a.dataset) / "manifest.json")
     llm = LLMGateway(mock=env.llm.mock or not a.real_llm)
-    client = QdrantClient(path=str(env.data_dir / "eval_qdrant"))
+    client = QdrantClient(path=str(env.data_dir / "eval_db" / gold.name))
     variants = [(n, load_profile(n)) for n in a.profiles.split(",")]
     out = Path(a.out or f"reports/{gold.name}")
     runs = asyncio.run(run_variants(env, client, variants, manifest, gold, llm, generate=a.generate, out_root=out,
@@ -90,7 +90,7 @@ def cmd_ablate(a):
     gold = GoldSet.load(Path(a.dataset) / "gold.json")
     manifest = CorpusManifest.load(Path(a.dataset) / "manifest.json")
     llm = LLMGateway(mock=True)
-    client = QdrantClient(path=str(env.data_dir / "eval_qdrant"))
+    client = QdrantClient(path=str(env.data_dir / "eval_db" / gold.name))
     base = load_profile("baseline")
     variants = ladder(base) if a.mode == "ladder" else leave_one_out(base)
     out = Path(a.out or f"reports/{gold.name}-{a.mode}")
@@ -100,6 +100,24 @@ def cmd_ablate(a):
     md = f"## {gold.name} / {a.mode}\n\n" + comparison_table(sums, metrics, ci=a.ci) + "\n\n### recall@5 by category\n\n" + category_table(sums, "recall@5") + "\n"
     Path(out).mkdir(parents=True, exist_ok=True)
     (Path(out) / "report.md").write_text(md)
+    print(md)
+    return 0
+
+
+def cmd_sweep(a):
+    import asyncio
+    from pathlib import Path
+    from qdrant_client import QdrantClient
+    from .eval.sweep import run_sweep, to_markdown
+    env = get_env()
+    ds = Path(a.dataset)
+    client = QdrantClient(path=str(env.data_dir / "eval_db" / f"sweep-{ds.name}"))
+    rows = asyncio.run(run_sweep(env, client, ds, a.experiment, a.models.split(",") if a.models else None,
+                                 set(a.only.split(";")) if a.only else None))
+    md = f"## sweep: {a.experiment} on {ds.name}\n\n" + to_markdown(rows)
+    out = Path(a.out or f"reports/sweep-{ds.name}-{a.experiment}.md")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(md)
     print(md)
     return 0
 
@@ -122,6 +140,8 @@ def main(argv=None):
     p.add_argument("--categories"); p.set_defaults(fn=cmd_eval)
     p = sub.add_parser("ablate"); p.add_argument("dataset"); p.add_argument("--mode", choices=["ladder", "loo"], default="ladder")
     p.add_argument("--generate", action="store_true"); p.add_argument("--ci", action="store_true"); p.add_argument("--out"); p.set_defaults(fn=cmd_ablate)
+    p = sub.add_parser("sweep"); p.add_argument("dataset"); p.add_argument("--experiment", default="all", choices=["models", "size", "overlap", "strategy", "retrieval", "all"])
+    p.add_argument("--models"); p.add_argument("--only"); p.add_argument("--out"); p.set_defaults(fn=cmd_sweep)
     p = sub.add_parser("stats"); p.set_defaults(fn=cmd_stats)
     a = ap.parse_args(argv)
     logging.basicConfig(level=get_env().log_level, format="%(levelname)s %(name)s: %(message)s")
