@@ -78,6 +78,11 @@ class LLMGateway:
             "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY", "AZURE_API_KEY",
             "COHERE_API_KEY", "MISTRAL_API_KEY", "GROQ_API_KEY", "OLLAMA_API_BASE"))
 
+    def as_llamaindex(self, model: str):
+        """The same model id as a LlamaIndex LLM, for LlamaIndex synthesizers/agents (see integrations/llamaindex.py)."""
+        from ..integrations.llamaindex import to_llamaindex_llm
+        return to_llamaindex_llm(self, model)
+
     # ------------------------------------------------------------------ core
     async def complete(self, prompt: str, *, model: str, task: str = "generic", system: str | None = None,
                        temperature: float = 0.0, max_tokens: int = 512, timeout_s: float = 60.0) -> str:
