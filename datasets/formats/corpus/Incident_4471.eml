@@ -1,0 +1,14 @@
+From: Maya Patel <maya.patel@helio.example>
+To: platform-oncall@helio.example
+Date: Tue, 21 Oct 2026 09:14:00 +0000
+Subject: Incident 4471 post-mortem
+Content-Type: text/plain; charset=utf-8
+
+Team,
+
+Incident 4471 caused 47 minutes of failed logins on 20 October. The root cause was an expired TLS certificate on gateway-7.
+Monitoring did not page because the certificate-expiry check only covered gateways 1 to 6.
+
+Actions: add gateway-7 to the expiry check (owner: Tomas), and move to automatic renewal by the end of November.
+
+Maya

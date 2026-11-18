@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[2]
 MODULE_TO_DIST = {"llama_index": "llama-index-core", "qdrant_client": "qdrant-client", "pydantic_settings": "pydantic-settings",
                   "pymupdf": "pymupdf", "pymupdf4llm": "pymupdf4llm", "yaml": "pyyaml", "prometheus_client": "prometheus-client",
                   "fastapi": "fastapi", "starlette": "fastapi", "uvicorn": "uvicorn", "httpx": "httpx", "numpy": "numpy",
-                  "pydantic": "pydantic", "litellm": "litellm", "fastembed": "fastembed", "celery": "celery"}
+                  "pydantic": "pydantic", "litellm": "litellm", "fastembed": "fastembed", "celery": "celery", "docx": "python-docx", "pptx": "python-pptx",
+                  "openpyxl": "openpyxl", "PIL": "pillow"}
 OPTIONAL = {"celery"}  # ingest extra: imported only by ingestion/tasks.py
 
 

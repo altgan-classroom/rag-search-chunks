@@ -71,7 +71,7 @@ def test_empty_doc_fails_cleanly_without_raising():
 def test_unsupported_extension_rejected_up_front():
     from orca_rag.ingestion.parsers import parse_file
     with pytest.raises(ValueError):
-        parse_file("notes.docx")
+        parse_file("notes.rtf")
 
 
 def test_contextual_skipped_with_warning_without_llm():

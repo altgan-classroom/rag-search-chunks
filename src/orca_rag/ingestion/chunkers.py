@@ -148,8 +148,10 @@ def _split_para(b: Block, budget: int) -> list[Block]:
     return [Block(t, b.page, b.kind, b.section, count_tokens(t)) for t in out]
 
 
-def _pack(blocks: list[Block], size: int, overlap: int, keep_tables: bool) -> list[tuple[list[Block], bool]]:
-    """Greedy pack blocks into groups <= size tokens. A heading is never left stranded at a group's end."""
+def _pack(blocks: list[Block], size: int, overlap: int, keep_tables: bool,
+          hard_pages: bool = False) -> list[tuple[list[Block], bool]]:
+    """Greedy pack blocks into groups <= size tokens. A heading is never left stranded at a group's end.
+    `hard_pages`: never let a group span two pages (slides, sheets), so a citation names exactly one slide or sheet."""
     norm: list[Block] = []
     for b in blocks:
         if b.tokens <= size:
@@ -162,6 +164,9 @@ def _pack(blocks: list[Block], size: int, overlap: int, keep_tables: bool) -> li
     cur: list[Block] = []
     cur_t = 0
     for b in norm:
+        if hard_pages and cur and b.page != cur[-1].page:
+            groups.append((cur, any(x.kind == "table" for x in cur)))
+            cur, cur_t = [], 0
         if cur and cur_t + b.tokens > size:
             while cur and cur[-1].kind == "heading":  # carry dangling heading forward
                 carried = [cur.pop()]
@@ -202,13 +207,14 @@ def chunk_structure(doc: ParsedDocument, cfg: ChunkingCfg) -> tuple[list[Chunk],
     blocks = _blocks(doc)
     if not blocks:
         return [], []
+    hard = bool(doc.meta.get("hard_pages"))
     if not cfg.parent_child:
-        return [_to_chunk(i, g, t) for i, (g, t) in enumerate(_pack(blocks, cfg.size, cfg.overlap, cfg.keep_tables_whole))], []
+        return [_to_chunk(i, g, t) for i, (g, t) in enumerate(_pack(blocks, cfg.size, cfg.overlap, cfg.keep_tables_whole, hard))], []
     parents: list[Chunk] = []
     children: list[Chunk] = []
-    for pi, (pg, pt) in enumerate(_pack(blocks, cfg.parent_size, 0, cfg.keep_tables_whole)):
+    for pi, (pg, pt) in enumerate(_pack(blocks, cfg.parent_size, 0, cfg.keep_tables_whole, hard)):
         parents.append(_to_chunk(pi, pg, pt))
-        for g, t in _pack(pg, cfg.size, cfg.overlap, cfg.keep_tables_whole):
+        for g, t in _pack(pg, cfg.size, cfg.overlap, cfg.keep_tables_whole, hard):
             children.append(_to_chunk(len(children), g, t, parent=pi))
     return children, parents
 

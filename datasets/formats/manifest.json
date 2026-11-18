@@ -1,0 +1,75 @@
+{
+ "name": "helio-formats",
+ "files": [
+  {
+   "file": "corpus/Employee_Handbook.docx",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Q3_Board_Update.pptx",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Sales_Pipeline_2026.xlsx",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Supplier_Contacts.csv",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Release_Notes.html",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Incident_4471.eml",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Safety_Manual.pdf",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Architecture_Notes.md",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Onboarding.txt",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  },
+  {
+   "file": "corpus/Whiteboard_Photo.png",
+   "tenant": "default",
+   "acl": [
+    "public"
+   ]
+  }
+ ]
+}

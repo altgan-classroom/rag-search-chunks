@@ -1,0 +1,5 @@
+Onboarding checklist for new hires
+
+Day 1: collect laptop from IT, sign the acceptable use policy.
+Day 2: complete security training. The training portal password resets every 90 days.
+Week 1: meet your buddy and shadow one on-call shift.

@@ -1,0 +1,444 @@
+{
+ "name": "helio-formats",
+ "description": "Facts planted in one place per file format; tests the parsers, not retrieval quality",
+ "questions": [
+  {
+   "id": "docx-table",
+   "question": "What is the daily meal limit for international travel?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Employee_Handbook",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "70"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "DOCX table cell"
+  },
+  {
+   "id": "docx-para",
+   "question": "How many days of paid leave do employees accrue each month?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Employee_Handbook",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "1.75"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "DOCX heading + paragraph"
+  },
+  {
+   "id": "pptx-table",
+   "question": "What was the Q3 revenue for APAC?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Q3_Board_Update",
+     "pages": [
+      3
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "3.1"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "PPTX table on slide 3"
+  },
+  {
+   "id": "pptx-notes",
+   "question": "When is the general availability date of the Helio X2?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Q3_Board_Update",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "14 march 2027"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "PPTX speaker notes (slide 4)"
+  },
+  {
+   "id": "pptx-chart",
+   "question": "How many planned units are there for the Beta stage?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Q3_Board_Update",
+     "pages": [
+      4
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "340"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "PPTX chart data"
+  },
+  {
+   "id": "xlsx-sheet2",
+   "question": "What is the value of the Falcon deal?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Sales_Pipeline_2026",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "480000"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "XLSX second sheet"
+  },
+  {
+   "id": "xlsx-stage",
+   "question": "Which deal is at the verbal commit stage?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Sales_Pipeline_2026",
+     "pages": [
+      2
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "osprey"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "XLSX row lookup"
+  },
+  {
+   "id": "csv-row",
+   "question": "Who is the contact at Norden Fasteners?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Supplier_Contacts",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "ingrid solberg"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "CSV row"
+  },
+  {
+   "id": "html-table",
+   "question": "Which version introduced the batch export API?",
+   "category": "table",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Release_Notes",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "3.5"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "HTML table behind nav/script noise"
+  },
+  {
+   "id": "eml-body",
+   "question": "What was the root cause of incident 4471?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Incident_4471",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "expired tls certificate"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "e-mail body"
+  },
+  {
+   "id": "pdf-fact",
+   "question": "What is the maximum rated load of the F-30 forklift?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Safety_Manual",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "2,500 kg",
+     "2500 kg"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "PDF text"
+  },
+  {
+   "id": "md-fact",
+   "question": "How long are audit logs retained?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Architecture_Notes",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "400 days"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "Markdown"
+  },
+  {
+   "id": "txt-fact",
+   "question": "How often does the training portal password reset?",
+   "category": "numeric",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Onboarding",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "90 days"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "plain text"
+  },
+  {
+   "id": "img-ocr",
+   "question": "Who owns the warehouse door code rotation?",
+   "category": "factoid",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Whiteboard_Photo",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "priya raman"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "text inside an image (OCR)"
+  },
+  {
+   "id": "para-leave",
+   "question": "What happens to leftover holiday allowance at year end?",
+   "category": "paraphrase",
+   "answerable": true,
+   "gold": [
+    {
+     "doc": "Employee_Handbook",
+     "pages": [
+      1
+     ]
+    }
+   ],
+   "must_contain": [
+    [
+     "12 days"
+    ]
+   ],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "paraphrase, no shared keywords"
+  },
+  {
+   "id": "none",
+   "question": "What is the CEO's favourite colour?",
+   "category": "unanswerable",
+   "answerable": false,
+   "gold": [],
+   "must_contain": [],
+   "gold_answer": null,
+   "history": [],
+   "tenant": "default",
+   "groups": [],
+   "forbidden_docs": [],
+   "forbidden_answer": [],
+   "source": "synthetic",
+   "status": "synthetic",
+   "notes": "abstain"
+  }
+ ]
+}

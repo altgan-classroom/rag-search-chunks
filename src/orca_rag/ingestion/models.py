@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 DOC_NS = uuid.UUID("0b7d6a1e-9c1d-4c0e-8d57-2f4a8d1d6e01")
-PARSER_VERSION = "2.1"
+PARSER_VERSION = "2.2"  # 2.2: multi-format parsers; slides/sheets are hard page boundaries
 
 
 def doc_id_for(sha256: str) -> str:

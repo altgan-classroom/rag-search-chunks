@@ -12,13 +12,33 @@ import logging
 import re
 from collections import Counter
 from pathlib import Path
+from typing import Protocol
 
 from .models import Page, ParsedDocument, sha256_file
 
 logger = logging.getLogger(__name__)
 _WORD = re.compile(r"[A-Za-z]{3,}")
 _TOK = re.compile(r"\S+")
-SUPPORTED = {".pdf", ".md", ".txt", ".html", ".htm"}
+
+
+class Parser(Protocol):
+    """A file-format parser. Add one by implementing this and calling `register(...)`; the CLI, `ingest_dir`, the worker and
+    the admin API all read the registry, so nothing else changes."""
+    exts: tuple[str, ...]  # lower-case, with the dot
+    cache_raw: bool  # True for expensive parsers whose raw output is worth caching (layout + OCR)
+
+    def parse(self, path: str, **kw) -> ParsedDocument: ...
+
+
+PARSERS: dict[str, Parser] = {}
+SUPPORTED: set[str] = set()  # kept in sync by register(); existing `from .parsers import SUPPORTED` keeps working
+
+
+def register(parser: Parser) -> Parser:
+    for e in parser.exts:
+        PARSERS[e.lower()] = parser
+        SUPPORTED.add(e.lower())
+    return parser
 
 
 _NUM = re.compile(r"\$?-?\d[\d,.]*%?")
@@ -100,7 +120,9 @@ def parse_pdf(path: str, **kw) -> ParsedDocument:
     return _finish(path, pages, meta)
 
 
-def _finish(path: str, pages: list[Page], meta: dict) -> ParsedDocument:
+def _finish(path: str, pages: list[Page], meta: dict, *, gate: bool = True) -> ParsedDocument:
+    """Cleanup + quality gate. `gate=False` is for born-digital formats (DOCX, PPTX, XLSX, CSV): there is no OCR noise to
+    filter, and a short slide or a small sheet is real content, so only truly empty pages are excluded."""
     warnings: list[str] = []
     removed = strip_running_lines(pages)
     if removed:
@@ -108,7 +130,10 @@ def _finish(path: str, pages: list[Page], meta: dict) -> ParsedDocument:
     for p in pages:
         p.markdown = _clean(p.markdown)
         p.quality = text_quality(p.markdown)
-        if len(p.markdown) < 40 or p.quality < 0.35:
+        if gate:
+            if len(p.markdown) < 40 or p.quality < 0.35:
+                p.skipped = True
+        elif not p.markdown.strip():
             p.skipped = True
     skipped = sum(p.skipped for p in pages)
     if skipped:
@@ -119,19 +144,34 @@ def _finish(path: str, pages: list[Page], meta: dict) -> ParsedDocument:
 
 
 def parse_text(path: str) -> ParsedDocument:
-    raw = Path(path).read_text(errors="replace")
-    if path.lower().endswith((".html", ".htm")):
-        raw = re.sub(r"<(script|style).*?</\1>", "", raw, flags=re.S | re.I)
-        raw = re.sub(r"<h([1-6])[^>]*>(.*?)</h\1>", lambda m: "\n\n" + "#" * int(m.group(1)) + " " + m.group(2) + "\n\n", raw, flags=re.S | re.I)
-        raw = re.sub(r"<[^>]+>", " ", raw)
-    return _finish(path, [Page(1, _clean(raw))], {"page_count": 1})
+    return _finish(path, [Page(1, _clean(Path(path).read_text(errors="replace")))], {"page_count": 1})
+
+
+class PdfParser:
+    exts = (".pdf",)
+    cache_raw = True
+
+    def parse(self, path: str, **kw) -> ParsedDocument:
+        return parse_pdf(path, **kw)
+
+
+class TextParser:
+    exts = (".md", ".txt")
+    cache_raw = False
+
+    def parse(self, path: str, **_) -> ParsedDocument:
+        return parse_text(path)
+
+
+def get_parser(path: str) -> Parser:
+    ext = Path(path).suffix.lower()
+    if ext not in PARSERS:  # reject up front instead of failing + retrying inside a worker (baseline I11)
+        raise ValueError(f"unsupported file type {ext!r}; supported: {sorted(SUPPORTED)}")
+    return PARSERS[ext]
 
 
 def parse_file(path: str, **kw) -> ParsedDocument:
-    ext = Path(path).suffix.lower()
-    if ext not in SUPPORTED:  # reject up front instead of failing + retrying inside a worker (baseline I11)
-        raise ValueError(f"unsupported file type {ext!r}; supported: {sorted(SUPPORTED)}")
-    return parse_pdf(path, **kw) if ext == ".pdf" else parse_text(path)
+    return get_parser(path).parse(path, **kw)
 
 
 RAW_CACHE_VERSION = "r1"
@@ -144,7 +184,7 @@ def parse_cached(path: str, cache_dir: str | Path | None, **kw) -> ParsedDocumen
     import hashlib
     import json
 
-    if cache_dir is None or Path(path).suffix.lower() != ".pdf":
+    if cache_dir is None or not get_parser(path).cache_raw:
         return parse_file(path, **kw)
     sha = sha256_file(path)
     opt = hashlib.sha1(json.dumps(kw, sort_keys=True, default=str).encode()).hexdigest()[:8]
@@ -158,3 +198,8 @@ def parse_cached(path: str, cache_dir: str | Path | None, **kw) -> ParsedDocumen
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(json.dumps({"meta": meta, "pages": [{"number": p.number, "markdown": p.markdown} for p in pages]}))
     return _finish(path, pages, meta)
+
+
+register(PdfParser())
+register(TextParser())
+from . import formats  # noqa: E402,F401  (registers DOCX, PPTX, XLSX, CSV, HTML, EML, image parsers)
