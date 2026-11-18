@@ -28,3 +28,5 @@ retrieval:
 generation:
   verify_grounding: true
   corrective: true
+  abstain_below: null        # no reranker => no relevance score, so there is no score-based abstention here: refusals rest on
+                             # empty retrieval and the grounding check. Turn rerank on (full.yaml) if you need a score gate.
