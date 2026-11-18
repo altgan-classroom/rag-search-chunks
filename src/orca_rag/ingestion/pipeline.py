@@ -122,6 +122,16 @@ class Ingestor:
             "chunk_count": len(children), "page_count": len(doc.pages), "ingested_at": now}}])
         rep.chunks, rep.parents = len(children), len(parents)
 
+    def ingest_manifest(self, path: str, *, force: bool = False) -> list[IngestReport]:
+        """Ingest every file of a corpus manifest (`manifest.json`, or a directory containing one) with the tenant and
+        ACL it declares, so multi-tenant corpora are not flattened into one tenant."""
+        from ..eval.schema import CorpusManifest
+        mp = Path(path)
+        mp = mp / "manifest.json" if mp.is_dir() else mp
+        m = CorpusManifest.load(mp)
+        return [self.ingest_file(str((Path(m.root) / f.file).resolve()), tenant=f.tenant, acl=f.acl, force=force)
+                for f in m.files]
+
     def ingest_dir(self, root: str, *, pattern: str = "**/*", **kw) -> list[IngestReport]:
         from .parsers import SUPPORTED
         files = sorted(p for p in Path(root).glob(pattern) if p.is_file() and p.suffix.lower() in SUPPORTED)

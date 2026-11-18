@@ -78,3 +78,26 @@ def test_contextual_skipped_with_warning_without_llm():
     store, ing = setup(contextual=True)
     r = ing.ingest_file("z.pdf", parsed=doc(BODY, key="z.pdf"))
     assert r.status == "ingested" and any("contextual" in w for w in r.warnings)
+
+
+def test_ingest_manifest_keeps_tenant_and_acl(tmp_path):
+    import json
+    for name, body in {"a.md": "# A\n\nAcme injection well pressure report. " * 20,
+                       "g.md": "# G\n\nGlobex injection well pressure report. " * 20,
+                       "h.md": "# H\n\nAcme HR only injection well note. " * 20}.items():
+        (tmp_path / name).write_text(body)
+    (tmp_path / "manifest.json").write_text(json.dumps({"name": "m", "files": [
+        {"file": "a.md", "tenant": "acme", "acl": ["public"]},
+        {"file": "g.md", "tenant": "globex", "acl": ["public"]},
+        {"file": "h.md", "tenant": "acme", "acl": ["group:hr"]}]}))
+    prof = Profile(embedding=EmbeddingCfg(dense_model="hash:128", sparse_model="hash-sparse"),
+                   chunking=ChunkingCfg(size=60, overlap=10, parent_size=200))
+    store = QdrantStore(Env(), prof, client=QdrantClient(":memory:"), collection="t")
+    reps = Ingestor(store, prof, parse_cache=tmp_path / "cache").ingest_manifest(str(tmp_path))  # a dir containing manifest.json
+    assert [r.status for r in reps] == ["ingested"] * 3
+
+    def docs(p):
+        return {h.doc for h in store.search("injection well pressure", p, top_k=20)}
+    assert docs(Principal("u", "acme")) == {"a"}                       # no Globex, no HR-only
+    assert docs(Principal("u", "acme", ("group:hr",))) == {"a", "h"}         # group member also sees the HR note
+    assert docs(Principal("u", "globex")) == {"g"}
