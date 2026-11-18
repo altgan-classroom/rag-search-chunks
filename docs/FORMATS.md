@@ -19,6 +19,13 @@ gates are identical for every format. Parsers live in `src/orca_rag/ingestion/fo
 Not supported (rejected up front with a clear error, not retried): legacy `.doc` / `.ppt` / `.xls`, `.rtf`, `.odt`, password-protected
 files, and `.json` (it would swallow `manifest.json` and gold files; convert the records you want searchable to CSV or markdown).
 
+## Try it (about 5 seconds, no API key)
+```bash
+make ingest P=datasets/formats                       # the ten-file corpus is tenant "default"
+make ask T=default Q="What was the Q3 revenue for APAC?"   # T=default matters: `make ask` defaults to tenant acme and will not see these files
+```
+(The PNG needs Tesseract; without it that one file fails with a clear message and the other nine are indexed.)
+
 ## Why slides and sheets are hard page boundaries
 Without it, a 4-slide deck became **one chunk cited as "pp. 1-4"** (found by the format corpus below). With `hard_pages` each
 slide or sheet is chunked on its own, so the answer to "Q3 revenue for APAC?" cites slide 3 exactly.

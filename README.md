@@ -19,7 +19,7 @@ difference, and `docs/COMPARISON.md` says which of those differences actually im
 ## Quick start (no API key, no GPU, no torch)
 ```bash
 make install && make data          # venv, real corpus (sha256-verified), synthetic corpus + gold
-make test                          # 80+ tests, fully offline
+make test                          # 130+ tests, fully offline
 make parse                         # OCR/layout once (cached)
 make eval D=datasets/synthetic     # baseline vs advanced vs full
 make ladder D=datasets/ccs         # one technique at a time

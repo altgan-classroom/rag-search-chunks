@@ -173,10 +173,10 @@ the Celery worker and the admin API in the Docker stack, and an SSE answer cited
 an explicit "OCR is required" message while the other nine ingest.
 
 ## 7. Model refresh (real corpus: 17 PDFs, 5,198 chunks, 55 questions; everything else = `configs/advanced.yaml`)
-Reference = bge-small-en-v1.5 + BM25 (the default). Each row changes ONE thing. Δ is the per-question paired difference vs the reference with a
+Reference = bge-small-en-v1.5 + BM25 (the shipped `advanced.yaml`). Its recall@5 here (0.898) is one question above ladder rung 3 in §1 (0.878): the two differ in exactly one question, a chat follow-up (`fu-vw1`), because `advanced.yaml` turns on history-aware query rewriting and the ladder's rung 3 does not (checked per question; one question = 0.020 at 49 answerable). Each row changes ONE thing. Δ is the per-question paired difference vs the reference with a
 bootstrap 95% CI; ▲ = CI excludes 0. `configs/experiments/models-2026.yaml`, `orca variants`, `orca compare --ref`.
 
-| variant | recall@1 | recall@5 (primary) | MRR | nDCG@10 | retrieval ms (mean, CPU) |
+| variant | recall@1 | recall@5 (primary) | MRR | nDCG@10 | retrieval ms (**mean**, CPU) |
 |---|---|---|---|---|---:|
 | **bge-small-en-v1.5** (reference) | 0.612 | 0.898 | 0.760 | 0.792 | 455 |
 | **snowflake-arctic-embed-s** (33M, 384-d) | 0.745 ▲ +0.133 [+0.031,+0.245] | 0.929 ≈ +0.031 [0.000,+0.082] | 0.851 ▲ +0.091 [+0.026,+0.162] | 0.863 ▲ +0.071 [+0.023,+0.126] | 449 |

@@ -40,7 +40,7 @@ def ladder_markdown(root: str | Path, metrics=("recall@5", "mrr", "ndcg@10", "an
                    key=lambda p: p.name)
     res = {r.name: load_results(r) for r in rungs}
     summ = {r.name: json.loads((r / "summary.json").read_text())["overall"] for r in rungs}
-    lines = ["| rung | " + " | ".join(f"{m} (Δ vs previous, 95% CI)" for m in metrics) + " | ctx tokens | p50 ms |",
+    lines = ["| rung | " + " | ".join(f"{m} (Δ vs previous, 95% CI)" for m in metrics) + " | ctx tokens | retrieval ms (mean) |",
              "|---|" + "---|" * len(metrics) + "---:|---:|"]
     prev = None
     for r in rungs:
@@ -68,7 +68,7 @@ def reference_markdown(root: str | Path, ref: str, metrics=("recall@5", "mrr", "
     runs = sorted(d for d in root.iterdir() if d.is_dir() and (d / "results.jsonl").exists())
     res = {r.name: load_results(r) for r in runs}
     summ = {r.name: json.loads((r / "summary.json").read_text())["overall"] for r in runs}
-    lines = ["| variant | " + " | ".join(f"{m} (Δ vs {ref}, 95% CI)" for m in metrics) + " | ctx tokens | p50 ms |",
+    lines = ["| variant | " + " | ".join(f"{m} (Δ vs {ref}, 95% CI)" for m in metrics) + " | ctx tokens | retrieval ms (mean) |",
              "|---|" + "---|" * len(metrics) + "---:|---:|"]
     for r in runs:
         cells = []

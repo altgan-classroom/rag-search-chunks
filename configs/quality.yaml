@@ -7,7 +7,7 @@
 # The query instruction ("Represent this sentence for searching relevant passages: ") is applied automatically (embedders.MODEL_PREFIXES).
 #
 # Optional, NOT included (different trade-off): a stronger reranker. BAAI/bge-reranker-v2-m3-int8 on top of bge-small raised recall@1 by
-# +0.143 [+0.010,+0.276] but left recall@5 unchanged and took ~9 s per query on a CPU laptop (p50 8.9 s vs 0.46 s). Worth it on a GPU or a
+# +0.143 [+0.010,+0.276] but left recall@5 unchanged and took ~9 s per query on a CPU laptop (mean 8.9 s vs 0.46 s). Worth it on a GPU or a
 # hosted reranker; to try it add:  retrieval: {rerank: {enabled: true, model: BAAI/bge-reranker-v2-m3-int8, candidates: 24, top_n: 8}}
 description: "advanced + snowflake-arctic-embed-s (measured better ranking on the real corpus; +66 MB download)"
 embedding:
