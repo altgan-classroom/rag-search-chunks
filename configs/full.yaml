@@ -1,6 +1,6 @@
 # EVERYTHING ON: the previous "advanced" recipe, kept for corpora where the cheap recipe's recall is not enough.
 # Measured on the real corpus with the ladder's full recipe (docs/COMPARISON.md; this file differs slightly: top_k 40, no blend): the
-# cross-encoder step adds ~2-3 s per query on a CPU laptop and no measurable recall@5 gain there. Try it on YOUR corpus with `make ladder` before turning it on.
+# cross-encoder step adds ~2-3 s per query on a CPU laptop and no measurable recall@5 gain there (MiniLM; a stronger reranker, bge-reranker-v2-m3, did lift recall@1 but took ~9 s/query on CPU: docs/COMPARISON.md §7). Try it on YOUR corpus with `make ladder` before turning it on.
 description: "Structure-aware parent-child chunks + hybrid + cross-encoder rerank + MMR + agentic generation"
 embedding:
   dense_model: BAAI/bge-small-en-v1.5

@@ -1,0 +1,37 @@
+# advanced.yaml + the one embedding upgrade that beat the reference on the real corpus (docs/COMPARISON.md §7).
+# snowflake-arctic-embed-s vs bge-small-en-v1.5 (17 real PDFs, 55 questions, paired bootstrap 95% CI of the per-question difference):
+#   recall@1 +0.133 [+0.031,+0.245]   MRR +0.091 [+0.026,+0.162]   nDCG@10 +0.071 [+0.023,+0.126]   (all exclude 0)
+#   recall@5 +0.031 [0.000,+0.082]    (no measurable effect on the primary metric; the gain is in ranking, i.e. the right passage is higher)
+# Same 384-d vectors, similar indexing and query time; costs a ~130 MB model download instead of ~67 MB. One corpus, n=55, and 5 metrics were
+# compared, so read it as "worth adopting if you can afford the download", not as proof. Same direction on ccs-mini (1.00 vs 0.95).
+# The query instruction ("Represent this sentence for searching relevant passages: ") is applied automatically (embedders.MODEL_PREFIXES).
+#
+# Optional, NOT included (different trade-off): a stronger reranker. BAAI/bge-reranker-v2-m3-int8 on top of bge-small raised recall@1 by
+# +0.143 [+0.010,+0.276] but left recall@5 unchanged and took ~9 s per query on a CPU laptop (p50 8.9 s vs 0.46 s). Worth it on a GPU or a
+# hosted reranker; to try it add:  retrieval: {rerank: {enabled: true, model: BAAI/bge-reranker-v2-m3-int8, candidates: 24, top_n: 8}}
+description: "advanced + snowflake-arctic-embed-s (measured better ranking on the real corpus; +66 MB download)"
+embedding:
+  dense_model: snowflake/snowflake-arctic-embed-s
+  sparse_model: Qdrant/bm25
+chunking:
+  strategy: structure
+  size: 350
+  overlap: 50
+  parent_child: true
+  parent_size: 1500
+  keep_tables_whole: true
+  contextual: false
+retrieval:
+  mode: hybrid
+  top_k: 20
+  fusion: rrf
+  rerank: {enabled: false}
+  parent_expand: true
+  final_k: 8
+  rewrite_with_history: true
+  decompose: false
+  router: false
+generation:
+  verify_grounding: true
+  corrective: true
+  abstain_below: null

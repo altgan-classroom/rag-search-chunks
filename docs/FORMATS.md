@@ -48,7 +48,7 @@ notes**, a **PPTX chart**, the **second sheet of an XLSX**, a **CSV row**, an **
 
 1. `tests/unit/test_formats.py` (offline): each parser returns the planted fact on the right page; short slides are not dropped by
    the OCR gate; slides/sheets never merge; hybrid search over the whole corpus returns the right document and exact page.
-2. `orca eval datasets/formats` (real embeddings): see the table in `docs/COMPARISON.md` §7.
+2. `orca eval datasets/formats` (real embeddings): see the table in `docs/COMPARISON.md` §6.
 3. Docker: the same files ingested through the Celery worker and the admin API inside the compose stack, then answered over SSE
    with the right slide cited.
 

@@ -46,6 +46,14 @@ all-MiniLM-L6-v2 0.89 (recall@5, 40 answerable questions: one question is 0.025)
 set; run `orca sweep --experiment models` on your own gold questions.** Check licence, language coverage, max input length,
 and whether the model expects a query/document prefix (`embedders.py` has a prefix registry).
 
+**Newer models, real corpus** (`docs/COMPARISON.md` §7, 55 questions, paired CIs vs bge-small): **snowflake-arctic-embed-s** ranked the right passage
+higher (MRR +0.09, recall@1 +0.13, both intervals exclude 0) at the same 384-d size, recall@5 unchanged: shipped as `configs/quality.yaml`.
+granite-embedding-small-english-r2 showed no measurable difference. Learned sparse **minicoil-v1 was worse than BM25**. The 300M-600M models
+(mxbai-embed-large, embeddinggemma-300m, Qwen3-Embedding-0.6B) were not run to completion on a CPU laptop (hours each): spec in
+`configs/experiments/models-2026.yaml`. Licences (from the fastembed model list): arctic, granite, mxbai, Qwen3: Apache-2.0; embeddinggemma: Gemma terms;
+**jina-embeddings-v3: CC-BY-NC (non-commercial), excluded**. Hosted embeddings (`dense_model: litellm:openai/text-embedding-3-small`, Voyage, Cohere,
+Gemini ...) are supported but unbenchmarked here; weigh per-token cost, data leaving your network and forced re-embedding when a provider retires a model.
+
 ## 4. Search mode and Qdrant parameters
 * Mode (recall@5): dense 0.84, sparse BM25 0.95, hybrid 0.95 (best MRR). Hybrid is the safe default when ids and codes matter.
 * HNSW: `m=16, ef=64..128` reached recall@10 1.00 at ~4 ms on 100k vectors; bigger `m` only cost build time.

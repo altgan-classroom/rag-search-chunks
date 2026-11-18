@@ -162,7 +162,45 @@ re-run it on your own vectors (`python -m orca_rag.eval.vector_bench`) before ch
   (about 6x), with identical recall. This is why `tenant`, `acl` and `doc_id` are indexed in `store/qdrant_store.py`.
 * The same container answered `/readyz` with "all shards are ready" (`data/qd_health.txt`), the probe the compose healthcheck uses.
 
-## 6. Caveats
+## 6. File formats (`datasets/formats`, 10 files, 16 questions): does every parser keep its facts addressable?
+Not a quality benchmark: ten tiny invented documents, one planted fact per format, gold questions naming document **and page**
+(`docs/FORMATS.md`). `orca eval datasets/formats`, profiles `advanced` and `full`, bge-small + BM25, 15 answerable questions:
+recall@1 = recall@5 = MRR = nDCG@10 = answer-in-context = **1.000** for both profiles (15 chunks in total). That is the expected
+result for a correct pipeline on a tiny corpus, and it is what failed before the page-boundary fix: a 4-slide deck was a single chunk cited
+as "pp. 1-4", so "Q3 revenue for APAC" could not cite slide 3. Fixed by treating slides and sheets as hard page boundaries
+(`chunkers._pack(hard_pages)`, regression test `test_slides_and_sheets_are_never_merged_into_one_chunk`). The same ten files were also ingested through
+the Celery worker and the admin API in the Docker stack, and an SSE answer cited `Q3_Board_Update` page 3. Without Tesseract the PNG fails with
+an explicit "OCR is required" message while the other nine ingest.
+
+## 7. Model refresh (real corpus: 17 PDFs, 5,198 chunks, 55 questions; everything else = `configs/advanced.yaml`)
+Reference = bge-small-en-v1.5 + BM25 (the default). Each row changes ONE thing. Δ is the per-question paired difference vs the reference with a
+bootstrap 95% CI; ▲ = CI excludes 0. `configs/experiments/models-2026.yaml`, `orca variants`, `orca compare --ref`.
+
+| variant | recall@1 | recall@5 (primary) | MRR | nDCG@10 | retrieval ms (mean, CPU) |
+|---|---|---|---|---|---:|
+| **bge-small-en-v1.5** (reference) | 0.612 | 0.898 | 0.760 | 0.792 | 455 |
+| **snowflake-arctic-embed-s** (33M, 384-d) | 0.745 ▲ +0.133 [+0.031,+0.245] | 0.929 ≈ +0.031 [0.000,+0.082] | 0.851 ▲ +0.091 [+0.026,+0.162] | 0.863 ▲ +0.071 [+0.023,+0.126] | 449 |
+| granite-embedding-small-english-r2 (47M, 384-d) | 0.694 ≈ +0.082 [-0.041,+0.204] | 0.867 ≈ -0.031 [-0.082,0.000] | 0.808 ≈ +0.048 [-0.016,+0.118] | 0.831 ≈ +0.039 [-0.011,+0.092] | 457 |
+| sparse = minicoil-v1 instead of BM25 | 0.541 ▼ -0.071 [-0.143,-0.010] | 0.857 ≈ -0.041 [-0.102,0.000] | 0.710 ▼ -0.050 [-0.098,-0.010] | 0.759 ▼ -0.033 [-0.070,-0.001] | 565 |
+| + reranker **bge-reranker-v2-m3-int8** (24 candidates) | 0.755 ▲ +0.143 [+0.010,+0.276] | 0.888 ≈ -0.010 [-0.102,+0.082] | 0.858 ≈ +0.098 [-0.007,+0.203] | 0.874 ≈ +0.082 [-0.002,+0.169] | **8,933** |
+| mxbai-embed-large-v1, embeddinggemma-300m, Qwen3-Embedding-0.6B-Q | not completed: see below | | | | |
+
+How to read it:
+* **arctic-embed-s ranks the right passage higher** (recall@1, MRR, nDCG@10 intervals exclude 0) at the same dimension and query cost, for a
+  ~66 MB larger download. The primary metric recall@5 shows no measurable difference (lower bound 0.000). Shipped as `configs/quality.yaml`;
+  `advanced.yaml` stays on bge-small so the lab, the ladder and the deck remain one consistent, reproducible recipe. The same direction
+  appeared on ccs-mini (arctic 1.00 vs bge-small 0.95, §4).
+* **A stronger reranker does help ranking, which refines the earlier "reranking did not help" result.** The MiniLM cross-encoder in the ladder (§1)
+  showed nothing; bge-reranker-v2-m3 raised recall@1 by +0.14 (CI excludes 0) and MRR by +0.10 (CI just includes 0), but recall@5 did not move, and
+  it cost ~9 s per query on a CPU laptop (some of that run overlapped other work on the machine). Worth testing where a GPU or hosted reranker is available.
+* granite-r2-small and the learned sparse model minicoil did not beat the defaults; minicoil is clearly worse than BM25 here and slower to index.
+* **Not completed:** mxbai-embed-large (335M), embeddinggemma-300m and Qwen3-Embedding-0.6B-Q. Indexing 5,198 chunks took ~9 min for a 33M-parameter model on this CPU, so
+  300M-600M models need hours; they are in the spec file, in that order, to run on a GPU/overnight (`orca variants datasets/ccs configs/experiments/models-2026.yaml --only mxbai-embed-large-v1`).
+  jina-embeddings-v3 was excluded on licence (CC-BY-NC).
+* **Caveats:** one corpus, n=55, model-authored questions; five metrics were compared per variant, so an isolated ▲ is weaker evidence than one that repeats across
+  metrics and corpora (arctic did both). Latencies are CPU laptop, single run, compare ratios not absolutes.
+
+## 8. Caveats
 Small n (CIs reported); one machine, CPU contention during runs inflates latency and index times; small ONNX models only;
 retrieval-only metrics; model-authored gold needing human review; **abstention is not benchmarked, and with the reranker off
 (`advanced.yaml`) there is no relevance-score gate: an unanswerable question relies on the grounded prompt and the grounding check
