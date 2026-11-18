@@ -25,6 +25,28 @@ from .parsers import parse_cached
 logger = logging.getLogger(__name__)
 
 
+_PERMANENT_OS = (FileNotFoundError, PermissionError, IsADirectoryError, NotADirectoryError)
+
+
+def is_transient(exc: BaseException) -> bool:
+    """True if retrying later can help: a dependency is unreachable or overloaded (network, timeouts, Qdrant 429/5xx).
+    False for anything about the document itself (corrupt file, unsupported type, empty text, missing file), which would
+    fail identically every time. Walks `__cause__`/`__context__`/`.source`, because qdrant-client wraps the httpx error."""
+    import httpx
+    seen: set[int] = set()
+    e: BaseException | None = exc
+    while e is not None and id(e) not in seen:
+        seen.add(id(e))
+        if isinstance(e, (ConnectionError, TimeoutError, httpx.TransportError)):
+            return True
+        if isinstance(e, OSError) and not isinstance(e, _PERMANENT_OS):
+            return True
+        if getattr(e, "status_code", None) in (429, 500, 502, 503, 504):  # qdrant UnexpectedResponse, httpx status errors
+            return True
+        e = e.__cause__ or e.__context__ or getattr(e, "source", None)
+    return False
+
+
 @dataclass
 class IngestReport:
     source_key: str
@@ -38,6 +60,7 @@ class IngestReport:
     seconds: float = 0.0
     warnings: list[str] = field(default_factory=list)
     error: str = ""
+    transient: bool = False  # failed for a reason that a retry can fix (dependency down); never set for bad documents
 
     def dict(self):
         return asdict(self)
@@ -80,7 +103,7 @@ class Ingestor:
             self._write(doc, tenant, acl or [PUBLIC], version, sig, rep)
         except Exception as e:  # report, don't crash a batch; callers decide on retry policy
             logger.exception("ingest failed for %s", path)
-            rep.status, rep.error = "failed", f"{type(e).__name__}: {e}"
+            rep.status, rep.error, rep.transient = "failed", f"{type(e).__name__}: {e}", is_transient(e)
         finally:
             rep.seconds = round(time.perf_counter() - t0, 2)
         return rep
