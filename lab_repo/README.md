@@ -124,7 +124,7 @@ should list nothing. To delete the project folder, remove it like any folder.
 |---|---|
 | `Cannot connect to the Docker daemon` | start Docker Desktop and wait for "Engine running" |
 | `port is already allocated` (6333) | stop whatever uses 6333 (another Qdrant?), or change the port in `docker-compose.yml` |
-| build is very slow or fails downloading | retry; on slow wifi do it at home. A corporate proxy needs Docker proxy settings |
+| build is very slow or fails downloading | retry; on slow wifi it can take 10 minutes or more, so keep it running while you read on, or ask for the saved image file. A corporate proxy needs Docker proxy settings |
 | `verify` says `NOT FOUND` | run step 4 first (and `docker compose up -d qdrant`) |
 | a worker is killed with exit 137 | Docker has too little memory: raise it to 4 GB, or scale to fewer workers |
 | a command waits for `qdrant` and it is stopped | `docker compose start qdrant` |
