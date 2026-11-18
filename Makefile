@@ -14,6 +14,10 @@ parse:          ## OCR/layout once, in parallel, into the parse cache
 	$(PY) -m orca_rag.cli parse data/raw/ccs --workers 4
 eval:           ## baseline vs advanced on a dataset:  make eval D=datasets/synthetic
 	$(PY) -m orca_rag.cli eval $(D) --profiles baseline,advanced,full
+ingest:         ## index a corpus (default: bundled multi-tenant synthetic one):  make ingest P=datasets/synthetic
+	$(PY) -m orca_rag.cli ingest $(or $(P),datasets/synthetic)
+ask:            ## search as a user:  make ask Q="total depth of MB-104" T=acme G=group:hr
+	$(PY) -m orca_rag.cli --tenant $(or $(T),acme) search "$(Q)" $(if $(G),--groups $(G))
 ladder:         ## cumulative ablation ladder
 	$(PY) -m orca_rag.cli ablate $(D) --mode ladder --ci
 loo:            ## leave-one-out from the full recipe
