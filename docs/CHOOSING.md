@@ -29,5 +29,26 @@ not a head-to-head.
 Questions to answer before benchmarking: expected vector count in 12 months, filter selectivity (how many tenants/ACL
 groups), update rate vs read rate, p95 latency budget, RAM budget, who operates it, and data-residency rules.
 
-## 2-4. Measured results
-(filled in from `reports/` after the experiments; see below)
+## 2. Chunking strategy and size (biggest lever)
+Measured on `datasets/ccs-mini` (details and caveats: `docs/COMPARISON.md` §4) and confirmed on the full real corpus (§1).
+
+| decision | result | choose |
+|---|---|---|
+| strategy | fixed 2048-char windows recall@5 0.66; semantic 0.90 (62 s to index); **structure-aware 0.95** (~22 s) | structure-aware; keep tables whole |
+| size (relative token budget) | 128-512 within 0.04 of each other; 1024 clearly worse (0.90, MRR 0.76) | 256-512; smaller = more vectors, slower indexing |
+| overlap | 0% / 15% / 30% = 0.975 / 0.950 / 0.938, no usable signal | start at ~15% and spend your effort elsewhere |
+| parent-child | recall unchanged; answer-in-context 0.86 → 0.98 on the real corpus, 3.4x context tokens | use when answers need surrounding text; drop to cut cost |
+
+## 3. Embedding model
+Same sweep: bge-small 0.95, bge-base 0.95, snowflake-arctic-embed-s 1.00, nomic-embed-text-v1.5 0.95, potion-retrieval-32M 0.925,
+all-MiniLM-L6-v2 0.89 (recall@5, 40 answerable questions: one question is 0.025). Larger/768-d models were not better than
+384-d ones here and cost more latency and memory. **Conclusion: differences among the good models are inside the noise of this
+set; run `orca sweep --experiment models` on your own gold questions.** Check licence, language coverage, max input length,
+and whether the model expects a query/document prefix (`embedders.py` has a prefix registry).
+
+## 4. Search mode and Qdrant parameters
+* Mode (recall@5): dense 0.84, sparse BM25 0.95, hybrid 0.95 (best MRR). Hybrid is the safe default when ids and codes matter.
+* HNSW: `m=16, ef=64..128` reached recall@10 1.00 at ~4 ms on 100k vectors; bigger `m` only cost build time.
+* Scalar quantization kept recall (0.996) and was faster; binary quantization collapsed at 384-d (0.27), so measure before use.
+* Index every field you filter on: a 1%-selectivity tenant filter was ~6x slower without a payload index (3.6 vs 21.8 ms).
+* Vector-benchmark data are synthetic Gaussians; re-run `orca_rag.eval.vector_bench` on your embeddings.

@@ -1,4 +1,9 @@
-description: "Structure-aware parent-child chunks + hybrid + cross-encoder rerank + MMR + agentic generation"
+# The recipe the evidence supports (docs/COMPARISON.md, ladder rungs 1-3 + 8 on the real corpus):
+#   structure-aware parent-child chunks + hybrid dense/BM25 + grounded, corrective generation.
+# Deliberately OFF, because on the real corpus (55 questions) they showed no measurable recall@5 gain and cost latency:
+#   cross-encoder rerank (+2-3 s/query on a CPU laptop), rerank blend, MMR, router, decomposition.
+# Turn them on with configs/full.yaml, but only after `make ladder D=<your dataset>` says they help on YOUR documents.
+description: "Structure-aware parent-child chunks + hybrid dense/BM25 + corrective generation (measured recipe)"
 embedding:
   dense_model: BAAI/bge-small-en-v1.5
   sparse_model: Qdrant/bm25
@@ -9,15 +14,17 @@ chunking:
   parent_child: true
   parent_size: 1500
   keep_tables_whole: true
-  contextual: false          # flip on when an LLM key is available (docs/TECHNIQUES.md)
+  contextual: false          # flip on when an LLM key is available (docs/TECHNIQUES.md); not benchmarked here
 retrieval:
   mode: hybrid
-  top_k: 40
+  top_k: 20
   fusion: rrf
-  rerank: {enabled: true, model: "Xenova/ms-marco-MiniLM-L-12-v2", top_n: 8}
-  mmr_lambda: 0.7
+  rerank: {enabled: false}
   parent_expand: true
-  final_k: 6
+  final_k: 8
+  rewrite_with_history: true # chat follow-ups need it; not isolated in the ladder (rung 7 bundles it with router/decompose)
+  decompose: false           # LLM-dependent, not benchmarked
+  router: false
 generation:
   verify_grounding: true
   corrective: true

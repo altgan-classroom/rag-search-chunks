@@ -13,7 +13,7 @@ data:           ## real corpus (pinned, sha256-verified) + synthetic corpus/gold
 parse:          ## OCR/layout once, in parallel, into the parse cache
 	$(PY) -m orca_rag.cli parse data/raw/ccs --workers 4
 eval:           ## baseline vs advanced on a dataset:  make eval D=datasets/synthetic
-	$(PY) -m orca_rag.cli eval $(D) --profiles baseline,advanced
+	$(PY) -m orca_rag.cli eval $(D) --profiles baseline,advanced,full
 ladder:         ## cumulative ablation ladder
 	$(PY) -m orca_rag.cli ablate $(D) --mode ladder --ci
 loo:            ## leave-one-out from the full recipe

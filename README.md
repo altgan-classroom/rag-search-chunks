@@ -19,7 +19,7 @@ difference, and `docs/COMPARISON.md` says which of those differences actually im
 make install && make data          # venv, real corpus (sha256-verified), synthetic corpus + gold
 make test                          # 80+ tests, fully offline
 make parse                         # OCR/layout once (cached)
-make eval D=datasets/synthetic     # baseline vs advanced
+make eval D=datasets/synthetic     # baseline vs advanced vs full
 make ladder D=datasets/ccs         # one technique at a time
 ORCA_LLM__MOCK=true make serve     # API on :8080 (anonymous dev mode, offline extractive answers)
 ```
