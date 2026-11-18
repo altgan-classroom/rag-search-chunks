@@ -21,7 +21,7 @@ from ..generation.verify import check_grounding
 from ..ingestion.chunkers import count_tokens
 from ..llm.gateway import LLMGateway
 from ..retrieval.pipeline import Retriever
-from ..store.qdrant_store import Principal, QdrantStore
+from ..store.base import Principal, VectorStore
 from .metrics import (bootstrap_ci, cited_source_precision, contains_all, is_abstention, retrieval_scores)
 from .schema import GoldQuestion, GoldSet
 
@@ -138,7 +138,7 @@ async def eval_question(q: GoldQuestion, retriever: Retriever, answerer: Answere
     return res
 
 
-async def evaluate(profile: Profile, gold: GoldSet, store: QdrantStore, llm: LLMGateway, *, generate: bool = False,
+async def evaluate(profile: Profile, gold: GoldSet, store: VectorStore, llm: LLMGateway, *, generate: bool = False,
                    limit: int | None = None, categories: set[str] | None = None) -> EvalRun:
     retriever = Retriever(store, profile, llm)
     answerer = Answerer(retriever, profile, llm) if generate else None

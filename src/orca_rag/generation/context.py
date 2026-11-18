@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 
 from ..ingestion.chunkers import count_tokens
-from ..store.qdrant_store import Hit
+from ..store.base import Hit
 
 
 @dataclass

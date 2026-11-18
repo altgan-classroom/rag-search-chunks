@@ -59,6 +59,7 @@ MODEL_PREFIXES: list[tuple[str, tuple[str, str]]] = [
     ("intfloat/multilingual-e5", ("passage: ", "query: ")),
     ("intfloat/e5", ("passage: ", "query: ")),
     ("snowflake/snowflake-arctic-embed", ("", _BGE_Q)),
+    ("mixedbread-ai/mxbai-embed", ("", _BGE_Q)),  # model card: prompt on queries only, none on documents
     ("Qwen/Qwen3-Embedding", ("", "Instruct: Given a web search query, retrieve relevant passages that answer the query\nQuery: ")),
     ("google/embeddinggemma", ("title: none | text: ", "task: search result | query: ")),
 ]

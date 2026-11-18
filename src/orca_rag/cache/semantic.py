@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..store.qdrant_store import Principal
+from ..store.base import Principal
 
 
 _FACTS = re.compile(r"[A-Za-z]*-?\d[\w\-.,/%]*")

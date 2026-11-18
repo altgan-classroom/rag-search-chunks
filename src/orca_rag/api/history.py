@@ -6,7 +6,7 @@ import threading
 import time
 from pathlib import Path
 
-from ..store.qdrant_store import Principal
+from ..store.base import Principal
 
 
 class HistoryStore:

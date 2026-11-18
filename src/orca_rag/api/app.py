@@ -21,7 +21,7 @@ from ..generation.answer import Answerer
 from ..ingestion.pipeline import Ingestor
 from ..llm.gateway import LLMGateway
 from ..retrieval.pipeline import Retriever
-from ..store.qdrant_store import Principal, QdrantStore
+from ..store.base import Principal, VectorStore, make_store
 from . import metrics
 from .history import HistoryStore
 from .security import RateLimiter, authenticate, require_admin
@@ -58,14 +58,14 @@ class IngestRequest(BaseModel):
     force: bool = False
 
 
-def create_app(env: Env | None = None, profile: Profile | None = None, *, store: QdrantStore | None = None,
+def create_app(env: Env | None = None, profile: Profile | None = None, *, store: VectorStore | None = None,
                llm: LLMGateway | None = None) -> FastAPI:
     env = env or get_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         prof = profile or load_profile()
-        st = store or QdrantStore(env, prof)
+        st = store or make_store(env, prof)
         gw = llm or LLMGateway(mock=env.llm.mock, num_retries=env.llm.num_retries, drop_params=env.llm.drop_params,
                                          mock_delay_ms=env.llm.mock_delay_ms)
         retr = Retriever(st, prof, gw)

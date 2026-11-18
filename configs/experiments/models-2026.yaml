@@ -1,0 +1,22 @@
+# Model refresh on the real corpus (datasets/ccs, 55 questions). Everything else = configs/advanced.yaml.
+# Run:  python -m orca_rag.cli variants datasets/ccs configs/experiments/models-2026.yaml
+# Then: python -m orca_rag.cli compare reports/models-ccs --ref 0-bge-small-en-v1.5
+# Excluded on purpose: jina-embeddings-v3 (CC-BY-NC, non-commercial). Gemma/Qwen/granite licences are in docs/CHOOSING.md.
+base: advanced
+variants:
+  - name: 0-bge-small-en-v1.5
+    overrides: {}
+  - name: arctic-embed-s
+    overrides: {embedding: {dense_model: snowflake/snowflake-arctic-embed-s}}
+  - name: granite-embedding-small-r2
+    overrides: {embedding: {dense_model: ibm-granite/granite-embedding-small-english-r2}}
+  - name: mxbai-embed-large-v1
+    overrides: {embedding: {dense_model: mixedbread-ai/mxbai-embed-large-v1}}
+  - name: embeddinggemma-300m
+    overrides: {embedding: {dense_model: google/embeddinggemma-300m}}
+  - name: qwen3-embedding-0.6b-q
+    overrides: {embedding: {dense_model: Qwen/Qwen3-Embedding-0.6B-Q}}
+  - name: sparse-minicoil-v1
+    overrides: {embedding: {sparse_model: Qdrant/minicoil-v1}}
+  - name: rerank-bge-v2-m3-int8
+    overrides: {retrieval: {rerank: {enabled: true, model: BAAI/bge-reranker-v2-m3-int8, candidates: 24, top_n: 8}}}

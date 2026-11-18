@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from fastapi import Depends, HTTPException, Request, status
 
-from ..store.qdrant_store import Principal
+from ..store.base import Principal
 
 
 def parse_principal(spec: str) -> Principal:

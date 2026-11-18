@@ -8,55 +8,23 @@ Fixes baseline REVIEW D1-D8, I3-I5. Notes:
 from __future__ import annotations
 
 import logging
-import uuid
-from dataclasses import dataclass, field
 from typing import Any
 
 from qdrant_client import QdrantClient, models as qm
 
 from ..config.settings import Env, Profile
+from .base import PUBLIC, Hit, Principal, point_id, register_store  # noqa: F401  (re-exported: existing imports keep working)
 from .embedders import DenseEmbedder, get_dense, get_late, get_sparse
 
 logger = logging.getLogger(__name__)
-NS = uuid.UUID("6f1c1c52-3a52-4a39-9d0e-0f0c5b7c9a11")
-PUBLIC = "public"
 DENSE, SPARSE, LATE = "dense", "sparse", "late"
-
-
-def point_id(doc_id: str, kind: str, ordinal: int | str) -> str:
-    return str(uuid.uuid5(NS, f"{doc_id}:{kind}:{ordinal}"))
-
-
-@dataclass(frozen=True)
-class Principal:
-    """Who is asking. Built from the API key / JWT, never from the request body."""
-    id: str
-    tenant: str = "default"
-    groups: tuple[str, ...] = ()
-    is_admin: bool = False
-
-
-@dataclass
-class Hit:
-    id: str
-    score: float
-    text: str
-    payload: dict[str, Any] = field(default_factory=dict)
-
-    @property
-    def doc(self) -> str:
-        return self.payload.get("doc_name", "")
-
-    @property
-    def pages(self) -> tuple[int | None, int | None]:
-        return self.payload.get("page_start"), self.payload.get("page_end")
 
 
 def acl_filter(p: Principal, extra: list[qm.Condition] | None = None, kinds: tuple[str, ...] = ("child",)) -> qm.Filter:
     must: list[qm.Condition] = [
         qm.FieldCondition(key="tenant", match=qm.MatchValue(value=p.tenant)),
         qm.FieldCondition(key="kind", match=qm.MatchAny(any=list(kinds))),
-        qm.FieldCondition(key="acl", match=qm.MatchAny(any=[PUBLIC, *p.groups, f"user:{p.id}"])),
+        qm.FieldCondition(key="acl", match=qm.MatchAny(any=sorted(p.visible_acl()))),
     ]
     return qm.Filter(must=must + (extra or []))
 
@@ -193,3 +161,6 @@ class QdrantStore:
     def stats(self) -> dict[str, Any]:
         info = self.client.get_collection(self.collection)
         return {"points": info.points_count, "status": str(info.status)}
+
+
+register_store("qdrant", lambda env, profile, **kw: QdrantStore(env, profile, **kw))

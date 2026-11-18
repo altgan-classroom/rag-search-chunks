@@ -11,12 +11,13 @@ from pathlib import Path
 from .config.settings import get_env, load_profile
 from .ingestion.pipeline import Ingestor
 from .llm.gateway import LLMGateway
-from .store.qdrant_store import Principal, QdrantStore
+from .store.base import make_store
+from .store.base import Principal
 
 
 def _store(profile_name: str):
     env, prof = get_env(), load_profile(profile_name)
-    return env, prof, QdrantStore(env, prof)
+    return env, prof, make_store(env, prof)
 
 
 def cmd_ingest(a):
@@ -109,6 +110,37 @@ def cmd_ablate(a):
     return 0
 
 
+def cmd_variants(a):
+    """Run named recipe variants (overrides on a base profile) from a YAML spec; per-question results are saved so
+    `compare --ref` can compute paired confidence intervals. Used for the model refresh (configs/experiments/)."""
+    import asyncio
+    from pathlib import Path
+    import yaml
+    from qdrant_client import QdrantClient
+    from .eval.ablate import run_variants, with_overrides
+    from .eval.harness import comparison_table
+    from .eval.schema import CorpusManifest, GoldSet
+    env = get_env()
+    spec = yaml.safe_load(Path(a.spec).read_text())
+    base = load_profile(spec.get("base", "advanced"))
+    gold = GoldSet.load(Path(a.dataset) / "gold.json")
+    manifest = CorpusManifest.load(Path(a.dataset) / "manifest.json")
+    keep = set(a.only.split(",")) if a.only else None
+    variants = [(v["name"], with_overrides(base, v["name"], v.get("overrides") or {})) for v in spec["variants"]
+                if not keep or v["name"] in keep]
+    client = QdrantClient(path=str(env.data_dir / "eval_db" / f"variants-{gold.name}"))
+    out = Path(a.out or f"reports/models-{Path(a.dataset).name}")
+    runs = []
+    for name, prof in variants:  # one at a time so a model that cannot load does not lose the others
+        try:
+            runs += asyncio.run(run_variants(env, client, [(name, prof)], manifest, gold, LLMGateway(mock=True), out_root=out))
+        except Exception as e:
+            print(f"[{name}] SKIPPED: {type(e).__name__}: {e}", flush=True)
+    sums = [r.summary() for r in runs]
+    print(comparison_table(sums, ["recall@1", "recall@5", "mrr", "ndcg@10", "answer_in_context", "context_tokens", "retrieval_ms"], ci=True))
+    return 0
+
+
 def cmd_sweep(a):
     import asyncio
     from pathlib import Path
@@ -128,7 +160,10 @@ def cmd_sweep(a):
 
 
 def cmd_compare(a):
-    from .eval.compare import ladder_markdown
+    from .eval.compare import ladder_markdown, reference_markdown
+    if a.ref:
+        print(reference_markdown(a.dir, a.ref))
+        return 0
     print(ladder_markdown(a.dir, skip=tuple(a.skip.split(",")) if a.skip else ()))
     return 0
 
@@ -152,9 +187,10 @@ def main(argv=None):
     p.add_argument("--categories"); p.set_defaults(fn=cmd_eval)
     p = sub.add_parser("ablate"); p.add_argument("dataset"); p.add_argument("--mode", choices=["ladder", "loo"], default="ladder")
     p.add_argument("--generate", action="store_true"); p.add_argument("--ci", action="store_true"); p.add_argument("--out"); p.set_defaults(fn=cmd_ablate)
+    p = sub.add_parser("variants"); p.add_argument("dataset"); p.add_argument("spec"); p.add_argument("--only", default=""); p.add_argument("--out", default=""); p.set_defaults(fn=cmd_variants)
     p = sub.add_parser("sweep"); p.add_argument("dataset"); p.add_argument("--experiment", default="all", choices=["models", "size", "overlap", "strategy", "retrieval", "all"])
     p.add_argument("--models"); p.add_argument("--only"); p.add_argument("--out"); p.set_defaults(fn=cmd_sweep)
-    p = sub.add_parser("compare"); p.add_argument("dir"); p.add_argument("--skip", default=""); p.set_defaults(fn=cmd_compare)
+    p = sub.add_parser("compare"); p.add_argument("dir"); p.add_argument("--skip", default=""); p.add_argument("--ref", default="", help="compare every variant to this one (paired bootstrap) instead of adjacent rungs"); p.set_defaults(fn=cmd_compare)
     p = sub.add_parser("stats"); p.set_defaults(fn=cmd_stats)
     a = ap.parse_args(argv)
     logging.basicConfig(level=get_env().log_level, format="%(levelname)s %(name)s: %(message)s")

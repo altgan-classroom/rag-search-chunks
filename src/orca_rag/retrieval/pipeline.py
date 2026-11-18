@@ -13,7 +13,7 @@ from qdrant_client import models as qm
 
 from ..config.settings import Profile
 from ..llm.gateway import LLMGateway
-from ..store.qdrant_store import Hit, Principal, QdrantStore
+from ..store.base import Hit, Principal, VectorStore
 from . import query as q
 from .fusion import mmr, rrf
 from .rerank import get_reranker
@@ -38,7 +38,7 @@ class Retrieval:
 
 
 class Retriever:
-    def __init__(self, store: QdrantStore, profile: Profile, llm: LLMGateway | None = None):
+    def __init__(self, store: VectorStore, profile: Profile, llm: LLMGateway | None = None):
         self.store, self.p = store, profile
         self.llm = llm or LLMGateway(mock=False)
         self.reranker = get_reranker(profile.retrieval.rerank.model if profile.retrieval.rerank.enabled else None)

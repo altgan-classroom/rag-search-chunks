@@ -2,10 +2,27 @@ from __future__ import annotations
 
 import threading
 from functools import lru_cache
+from typing import Callable, Protocol
 
-from ..store.qdrant_store import Hit
+from ..store.base import Hit
 
 _lock = threading.Lock()
+
+
+class Reranker(Protocol):
+    """Re-orders first-stage hits for one query. Scores are only comparable within a query."""
+    name: str
+
+    def rerank(self, query: str, hits: list[Hit], top_n: int) -> list[Hit]: ...
+
+
+_FACTORIES: dict[str, Callable[[str], Reranker]] = {}
+
+
+def register_reranker(model_prefix: str, factory: Callable[[str], Reranker]) -> None:
+    """Route model ids starting with `model_prefix` to `factory(model_id)` (e.g. a hosted rerank API); the longest
+    registered prefix wins and anything unregistered falls back to a local fastembed cross-encoder."""
+    _FACTORIES[model_prefix] = factory
 
 
 class NoopReranker:
@@ -53,4 +70,5 @@ def get_reranker(model: str | None):
         return NoopReranker()
     if model == "lexical":
         return LexicalReranker()
-    return CrossEncoderReranker(model)
+    match = max((k for k in _FACTORIES if model.startswith(k)), key=len, default=None)
+    return _FACTORIES[match](model) if match else CrossEncoderReranker(model)

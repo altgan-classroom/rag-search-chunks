@@ -54,4 +54,4 @@ select = ["E", "F", "W"]
 ignore = ["E501", "E701", "E702", "E731", "E741"]
 
 [tool.ruff.lint.per-file-ignores]
-"slides/*.py" = ["F405", "F403"]   # deck builders use `from deckkit import *` on purpose   # long lines/compact one-liners are deliberate in places; lint for real defects
+"slides/*.py" = ["F405", "F403", "E743"]   # deck builders use `from deckkit import *` on purpose   # long lines/compact one-liners are deliberate in places; lint for real defects

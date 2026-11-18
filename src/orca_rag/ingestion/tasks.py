@@ -15,7 +15,7 @@ from celery.signals import worker_process_init
 
 from ..config.settings import get_env, load_profile
 from ..llm.gateway import LLMGateway
-from ..store.qdrant_store import QdrantStore
+from ..store.base import make_store
 from .pipeline import Ingestor
 
 REDIS = os.environ.get("ORCA_REDIS_URL", "redis://localhost:6379/0")
@@ -34,7 +34,7 @@ TRANSIENT = (ConnectionError, TimeoutError, OSError)
 def _warm(**_):
     global _ing
     env, prof = get_env(), load_profile()
-    _ing = Ingestor(QdrantStore(env, prof), prof, LLMGateway(mock=env.llm.mock))
+    _ing = Ingestor(make_store(env, prof), prof, LLMGateway(mock=env.llm.mock))
 
 
 def _ingestor() -> Ingestor:

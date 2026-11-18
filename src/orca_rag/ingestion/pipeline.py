@@ -16,7 +16,7 @@ from pathlib import Path
 
 from ..config.settings import Profile
 from ..llm.gateway import LLMGateway
-from ..store.qdrant_store import PUBLIC, QdrantStore, point_id
+from ..store.base import PUBLIC, VectorStore, point_id
 from .chunkers import chunk_document
 from .enrich import contextualize, extract_doc_meta
 from .models import PARSER_VERSION, ParsedDocument
@@ -48,7 +48,7 @@ def recipe_signature(profile: Profile) -> str:
 
 
 class Ingestor:
-    def __init__(self, store: QdrantStore, profile: Profile, llm: LLMGateway | None = None,
+    def __init__(self, store: VectorStore, profile: Profile, llm: LLMGateway | None = None,
                  parse_cache: str | Path | None = None):
         self.store, self.profile, self.llm = store, profile, llm
         self.parse_cache = parse_cache or (store.env.data_dir / "parsed")

@@ -155,6 +155,7 @@ class Env(BaseSettings):
     qdrant: QdrantEnv = QdrantEnv()
     llm: LLMEnv = LLMEnv()
     auth: AuthEnv = AuthEnv()
+    store_backend: str = "qdrant"  # ORCA_STORE_BACKEND: qdrant | memory | any name registered via store.base.register_store
     semantic_cache: bool = True
     log_level: str = "INFO"
 

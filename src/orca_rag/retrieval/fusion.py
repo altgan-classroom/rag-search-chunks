@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..store.qdrant_store import Hit
+from ..store.base import Hit
 
 
 def rrf(rankings: list[list[Hit]], k: int = 60, weights: list[float] | None = None) -> list[Hit]:

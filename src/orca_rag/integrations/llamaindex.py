@@ -26,7 +26,7 @@ from ..ingestion.models import Page, ParsedDocument
 from ..ingestion.parsers import parse_file
 from ..llm.gateway import LLMGateway
 from ..retrieval.pipeline import Retriever
-from ..store.qdrant_store import Hit, Principal
+from ..store.base import Hit, Principal
 
 
 def hit_to_node(h: Hit) -> NodeWithScore:

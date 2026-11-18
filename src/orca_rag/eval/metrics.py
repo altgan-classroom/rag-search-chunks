@@ -7,7 +7,7 @@ import random
 import re
 from dataclasses import dataclass, field
 
-from ..store.qdrant_store import Hit
+from ..store.base import Hit
 from .schema import GoldQuestion, GoldRef
 
 ABSTAIN_PAT = re.compile(r"(could not find|cannot find|can't find|not (?:found|mentioned|provided|available|contained)|"

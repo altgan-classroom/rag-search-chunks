@@ -18,7 +18,7 @@ from ..generation.prompts import GRADE
 from ..llm.gateway import LLMGateway
 from ..retrieval.fusion import rrf
 from ..retrieval.pipeline import Retrieval, Retriever, Step
-from ..store.qdrant_store import Principal
+from ..store.base import Principal
 
 import time
 

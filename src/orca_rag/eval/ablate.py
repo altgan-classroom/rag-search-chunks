@@ -13,6 +13,7 @@ from qdrant_client import QdrantClient
 from ..config.settings import Env, Profile
 from ..ingestion.pipeline import Ingestor
 from ..llm.gateway import LLMGateway
+from ..store.base import VectorStore
 from ..store.qdrant_store import QdrantStore
 from .harness import EvalRun, evaluate
 from .schema import CorpusManifest, GoldSet
@@ -33,7 +34,7 @@ def with_overrides(base: Profile, name: str, overrides: dict) -> Profile:
     return Profile.model_validate(data)
 
 
-def ensure_indexed(store: QdrantStore, profile: Profile, manifest: CorpusManifest, llm: LLMGateway | None = None) -> dict:
+def ensure_indexed(store: VectorStore, profile: Profile, manifest: CorpusManifest, llm: LLMGateway | None = None) -> dict:
     ing = Ingestor(store, profile, llm)
     t0 = time.perf_counter()
     stats = {"ingested": 0, "unchanged": 0, "failed": 0, "chunks": 0}

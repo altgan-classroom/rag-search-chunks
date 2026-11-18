@@ -19,7 +19,7 @@ from ..agentic.corrective import corrective_retrieve
 from ..config.settings import Profile
 from ..llm.gateway import LLMGateway
 from ..retrieval.pipeline import Retrieval, Retriever
-from ..store.qdrant_store import Principal
+from ..store.base import Principal
 from .context import build_sources, render_sources, sources_event_payload
 from .prompts import ABSTAIN, ANSWER, RELATED, SYSTEM
 from .verify import check_grounding, verify_llm
