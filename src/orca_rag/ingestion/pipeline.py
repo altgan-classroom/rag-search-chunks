@@ -102,7 +102,7 @@ class Ingestor:
                 rep.status = "ingested"
             self._write(doc, tenant, acl or [PUBLIC], version, sig, rep)
         except Exception as e:  # report, don't crash a batch; callers decide on retry policy
-            logger.exception("ingest failed for %s", path)
+            logger.warning("ingest failed for %s: %s: %s", path, type(e).__name__, e, exc_info=logger.isEnabledFor(logging.DEBUG))
             rep.status, rep.error, rep.transient = "failed", f"{type(e).__name__}: {e}", is_transient(e)
         finally:
             rep.seconds = round(time.perf_counter() - t0, 2)

@@ -1,0 +1,78 @@
+# Orca ingestion lab. Own project name, so `docker compose down -v` here can never touch anything else on your machine.
+name: orca-lab
+
+x-app: &app
+  build: {context: .}
+  image: orca-lab:latest
+  environment: &env
+    ORCA_QDRANT__URL: http://qdrant:6333
+    ORCA_LLM__MOCK: "true"                 # no LLM is needed to ingest or to search
+    ORCA_REDIS_URL: redis://redis:6379/0
+    # short timers so the break-it exercises finish in minutes; production keeps long ones (docs/PRODUCTION.md)
+    ORCA_CELERY_TIME_LIMIT_S: "120"
+    ORCA_CELERY_SOFT_LIMIT_S: "100"
+    ORCA_CELERY_VISIBILITY_S: "150"
+    ORCA_CELERY_RETRY_BACKOFF_S: "5"
+    ORCA_CELERY_MAX_RETRIES: "6"
+    ORCA_EMBED_THREADS: "1"                  # each worker replica uses ONE core; add replicas, not threads, to scale out
+  volumes:
+    - ./data/raw:/data/raw:ro              # drop up to 5 of your own files here
+    - ./challenge:/challenge:ro
+    - ./data/load:/data/load:ro            # generated load for the scaling exercise
+
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.20.2
+    ports: ["127.0.0.1:6333:6333"]          # dashboard: http://localhost:6333/dashboard (lab only: no API key)
+    volumes: [qdrant_storage:/qdrant/storage]
+    environment: {QDRANT__TELEMETRY_DISABLED: "true"}
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333 && printf \"GET /readyz HTTP/1.0\\r\\n\\r\\n\" >&3 && head -n1 <&3 | grep -q 200'"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  # ---- Part 1: one-shot ingestion + verification --------------------------------------------------------------
+  ingest:
+    <<: *app
+    command: ["python", "-m", "orca_rag.cli", "--tenant", "lab", "ingest", "/data/raw"]
+    depends_on: {qdrant: {condition: service_healthy}}
+
+  challenge:                       # a folder with one corrupt PDF: what happens to the good file next to it?
+    <<: *app
+    command: ["python", "-m", "orca_rag.cli", "--tenant", "lab", "ingest", "/challenge"]
+    depends_on: {qdrant: {condition: service_healthy}}
+
+  verify:
+    <<: *app
+    command: ["python", "-m", "orca_rag.cli", "--tenant", "lab", "verify", "--query", "What was the Q3 revenue for APAC?"]
+    depends_on: {qdrant: {condition: service_healthy}}
+
+  # ---- Part 2 (profile "queue"): queue + workers, to break things on purpose -------------------------------------
+  redis:
+    profiles: ["queue"]
+    image: redis:7.4-alpine
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 5s, timeout: 3s, retries: 10}
+
+  worker:
+    profiles: ["queue"]
+    <<: *app
+    command: ["celery", "-A", "orca_rag.ingestion.tasks", "worker", "--loglevel=INFO", "--concurrency=1"]   # one job at a time per replica: scale by adding replicas
+    depends_on:
+      redis: {condition: service_healthy}
+      qdrant: {condition: service_healthy}
+    mem_limit: 1g
+
+  enqueue:
+    profiles: ["queue"]
+    <<: *app
+    user: "0"                                  # may write generated files into the bind-mounted ./data/load on any host OS
+    entrypoint: ["python", "-m", "orca_rag.cli", "--tenant", "lab", "enqueue"]
+    command: ["/data/raw", "--wait"]
+    volumes:
+      - ./data/raw:/data/raw:ro
+      - ./data/load:/data/load                # the only place a lab container writes files
+    depends_on: {redis: {condition: service_healthy}}   # NOT qdrant: it must keep working while qdrant is down
+
+volumes: {qdrant_storage: {}}

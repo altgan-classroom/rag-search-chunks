@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import os
+import socket
 
 from celery import Celery
 from celery.signals import worker_process_init
@@ -64,4 +65,6 @@ def ingest_file(self, path: str, tenant: str = "default", acl: list[str] | None 
     rep = _ingestor().ingest_file(path, tenant=tenant, acl=acl, force=force)
     if rep.status == "failed" and rep.transient:
         raise ConnectionError(rep.error)  # a dependency is down: let Celery retry with backoff (a bad document is NOT retried)
-    return rep.dict()
+    out = rep.dict()
+    out["worker"] = socket.gethostname()  # which replica processed it (visible when you scale workers)
+    return out

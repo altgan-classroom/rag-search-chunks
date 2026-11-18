@@ -1,6 +1,5 @@
 """Which ingestion failures are worth retrying? A dependency being down is; a bad document is not."""
 import httpx
-import pytest
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
 

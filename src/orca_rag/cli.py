@@ -168,6 +168,98 @@ def cmd_compare(a):
     return 0
 
 
+def cmd_verify(a):
+    """What is actually in the vector database? Collection, points by kind, vector shapes, one real payload, one search.
+    Parents and manifests are payload-only points (no vectors), so raw `points_count` alone is misleading."""
+    import math
+    from qdrant_client import models as qm
+    env, prof, store = _store(a.profile)
+    c, name = store.client, store.collection
+    print(f"qdrant      {env.qdrant.url or env.qdrant.path}")
+    print(f"collections {[x.name for x in c.get_collections().collections]}")
+    if not c.collection_exists(name):
+        print(f"collection  {name}: NOT FOUND (run the ingestion first)")
+        return 1
+    info = c.get_collection(name)
+    vecs = info.config.params.vectors
+    print(f"collection  {name}  status={info.status}  points_count={info.points_count}")
+    print("vectors     " + ", ".join(f"{k}: size={v.size} distance={v.distance.name}" for k, v in vecs.items())
+          + (f", sparse: {list((info.config.params.sparse_vectors or {}).keys())}"))
+    by = {k: c.count(name, count_filter=qm.Filter(must=[qm.FieldCondition(key="kind", match=qm.MatchValue(value=k))]), exact=True).count
+          for k in ("child", "parent", "doc")}
+    print(f"by kind     child={by['child']} (searchable, have vectors)  parent={by['parent']} (context text, no vectors)  doc={by['doc']} (one manifest per file)")
+    docs, _ = c.scroll(name, limit=100, with_payload=True, scroll_filter=qm.Filter(must=[qm.FieldCondition(key="kind", match=qm.MatchValue(value="doc"))]))
+    for d in sorted(docs, key=lambda p: p.payload.get("source_key", "")):
+        pl = d.payload
+        print(f"  file      {pl.get('source_key', '?'):32s} tenant={pl.get('tenant')} pages={pl.get('page_count')} chunks={pl.get('chunk_count')} v{pl.get('version')}")
+    pts, _ = c.scroll(name, limit=1, with_payload=True, with_vectors=True, scroll_filter=qm.Filter(must=[qm.FieldCondition(key="kind", match=qm.MatchValue(value="child"))]))
+    if pts:
+        p0, v = pts[0], pts[0].vector
+        dense = v.get("dense")
+        sp = v.get("sparse")
+        pl = p0.payload
+        print(f"sample point {p0.id}")
+        if dense:
+            print(f"  dense     dim={len(dense)} first6={[round(x, 3) for x in dense[:6]]} L2norm={math.sqrt(sum(x * x for x in dense)):.3f}")
+        if sp is not None:
+            print(f"  sparse    non-zero terms={len(sp.indices)} e.g. {list(zip(sp.indices[:3], [round(x, 2) for x in sp.values[:3]]))}")
+        print(f"  payload   tenant={pl.get('tenant')} acl={pl.get('acl')} doc={pl.get('doc_name')} page={pl.get('page_start')} section={pl.get('section')!r}")
+        print(f"  text      {pl.get('text', '')[:110]!r}")
+    if a.query:
+        from .store.base import Principal
+        print(f"search      {a.query!r} as tenant={a.tenant}")
+        for h in store.search(a.query, Principal("verify", a.tenant), mode=prof.retrieval.mode, top_k=3):
+            lo, hi = h.pages
+            print(f"  {h.score:.3f}  {h.doc}  p.{lo}-{hi}  {h.text[:90]!r}")
+    return 0
+
+
+def _write_synthetic(root: Path, n: int) -> None:
+    """N DISTINCT small documents (different words, one unique fact each) so a load test spreads over many documents instead of
+    hammering the same ones. Deterministic: the same N always produces the same files, so re-running is idempotent."""
+    import random
+    vocab = ("pressure injection reservoir seal permeability monitoring pump valve sensor casing flow rate depth pipeline "
+             "inspection calibration shutdown maintenance compliance sampling anomaly baseline threshold telemetry cable "
+             "well pad integrity cement perforation tracer plume saline aquifer fault caprock porosity logging").split()
+    root.mkdir(parents=True, exist_ok=True)
+    for i in range(n):
+        rnd = random.Random(i)
+        paras = [" ".join(rnd.choice(vocab) for _ in range(45)).capitalize() + "." for _ in range(8)]
+        (root / f"load_{i:04d}.md").write_text(f"# Site report {i:04d}\n\n" + "\n\n".join(paras[:4]) + f"\n\n## Equipment\n\nThe pump serial for unit {i:04d} is PX-{i * 7 + 1000}.\n\n"
+                                              + "\n\n".join(paras[4:]) + "\n")
+
+
+def cmd_enqueue(a):
+    """Put ingestion jobs on the Celery queue (Redis) and, with --wait, show how they were processed. Workers see the path
+    as THEY mount it, so give the container path (e.g. /data/raw)."""
+    import collections
+    import os
+    from .ingestion.parsers import SUPPORTED
+    from .ingestion.tasks import ingest_file
+    if a.synthetic:
+        _write_synthetic(Path(a.path), a.synthetic)
+    files = sorted(str(p) for p in Path(a.path).rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED) if Path(a.path).is_dir() else [a.path]
+    jobs = [f for _ in range(a.copies) for f in files]
+    t0 = time.time()
+    res = [ingest_file.delay(f, tenant=a.tenant, force=a.force or a.copies > 1) for f in jobs]
+    print(f"enqueued {len(res)} jobs ({len(files)} files x {a.copies}); broker={os.environ.get('ORCA_REDIS_URL', 'redis://localhost:6379/0').split('@')[-1]}")
+    if not a.wait:
+        return 0
+    status, workers = collections.Counter(), collections.Counter()
+    for r in res:
+        try:
+            d = r.get(timeout=a.timeout)
+            status[d["status"]] += 1
+            workers[d.get("worker", "?")] += 1
+            if d["status"] == "failed":
+                print(f"  FAILED {d['source_key']}: {d['error'][:100]}")
+        except Exception as e:
+            status["no-result"] += 1
+            print(f"  no result for {r.id[:8]}: {type(e).__name__}")
+    print(f"done in {time.time() - t0:.1f}s  status={dict(status)}  by worker={dict(workers)}")
+    return 1 if status.get("failed") or status.get("no-result") else 0
+
+
 def cmd_stats(a):
     _, _, store = _store(a.profile)
     print(json.dumps({**store.health(), **store.stats()}, indent=1))
@@ -191,6 +283,9 @@ def main(argv=None):
     p = sub.add_parser("sweep"); p.add_argument("dataset"); p.add_argument("--experiment", default="all", choices=["models", "size", "overlap", "strategy", "retrieval", "all"])
     p.add_argument("--models"); p.add_argument("--only"); p.add_argument("--out"); p.set_defaults(fn=cmd_sweep)
     p = sub.add_parser("compare"); p.add_argument("dir"); p.add_argument("--skip", default=""); p.add_argument("--ref", default="", help="compare every variant to this one (paired bootstrap) instead of adjacent rungs"); p.set_defaults(fn=cmd_compare)
+    p = sub.add_parser("verify"); p.add_argument("--query", default=""); p.set_defaults(fn=cmd_verify)
+    p = sub.add_parser("enqueue"); p.add_argument("path"); p.add_argument("--copies", type=int, default=1); p.add_argument("--force", action="store_true")
+    p.add_argument("--synthetic", type=int, default=0, help="first write N distinct small documents into PATH"); p.add_argument("--wait", action="store_true"); p.add_argument("--timeout", type=int, default=600); p.set_defaults(fn=cmd_enqueue)
     p = sub.add_parser("stats"); p.set_defaults(fn=cmd_stats)
     a = ap.parse_args(argv)
     logging.basicConfig(level=get_env().log_level, format="%(levelname)s %(name)s: %(message)s")

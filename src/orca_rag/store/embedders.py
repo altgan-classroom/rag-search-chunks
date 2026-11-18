@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 import re
 import threading
 from functools import lru_cache
@@ -15,6 +16,13 @@ import numpy as np
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 _lock = threading.Lock()
+
+
+def _threads() -> int | None:
+    """ORCA_EMBED_THREADS caps ONNX intra-op threads per process. Default (unset) = onnxruntime uses every core, which is right
+    for one process but oversubscribes the CPU when you run several workers: cap it to scale out by replicas."""
+    v = os.environ.get("ORCA_EMBED_THREADS")
+    return int(v) if v else None
 
 
 class DenseEmbedder(Protocol):
@@ -77,7 +85,7 @@ class FastEmbedDense:
         from fastembed import TextEmbedding
 
         self.name = model
-        self._m = TextEmbedding(model_name=model)
+        self._m = TextEmbedding(model_name=model, threads=_threads())
         self.dim = len(next(iter(self._m.embed(["probe"]))))
         self._dp, self._qp = resolve_prefixes(model, doc_prefix, query_prefix)
 
@@ -157,7 +165,7 @@ class FastEmbedSparse:
         from fastembed import SparseTextEmbedding
 
         self.name = model
-        self._m = SparseTextEmbedding(model_name=model)
+        self._m = SparseTextEmbedding(model_name=model, threads=_threads())
 
     def embed_docs(self, texts):
         with _lock:
@@ -180,7 +188,7 @@ class FastEmbedLate:
         from fastembed import LateInteractionTextEmbedding
 
         self.name = model
-        self._m = LateInteractionTextEmbedding(model_name=model)
+        self._m = LateInteractionTextEmbedding(model_name=model, threads=_threads())
         self.dim = int(next(iter(self._m.embed(["probe"]))).shape[-1])
 
     def embed_docs(self, texts):
