@@ -119,7 +119,7 @@ class Profile(BaseModel):
         c, e = self.chunking, self.embedding
         sig = "|".join(map(str, [e.dense_model, e.sparse_model, e.late_model, c.strategy, c.size, c.overlap,
                                  c.parent_child, c.parent_size, c.contextual, c.add_doc_title]))
-        return f"orca_{hashlib.sha1(sig.encode()).hexdigest()[:10]}"
+        return f"rag_{hashlib.sha1(sig.encode()).hexdigest()[:10]}"
 
 
 # --------------------------------------------------------------------------- deployment env

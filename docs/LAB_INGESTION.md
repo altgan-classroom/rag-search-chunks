@@ -26,7 +26,7 @@ Expected (timings vary):
 ```
 ingested  AnnualMonitoringReport_2021.pdf   pages=  6 skip=  0 chunks=  10
 ...                                          (58 files)
-profile=advanced collection=orca_461716c917 total=20s stats={'points': 216, 'status': 'green'}
+profile=advanced collection=rag_461716c917 total=20s stats={'points': 216, 'status': 'green'}
 ```
 Parser notices such as "RapidOCR is missing / Using Tesseract" are printed per file and are harmless.
 
@@ -57,7 +57,7 @@ scores, so they are comparable within one query only.
 2. Why did the first search return one `MB-104` document for `acme` and a different one for `globex`?
 3. Open `datasets/synthetic/manifest.json` and add `"tenant": "acme"` to a file of your own; ingest it and find it.
 4. Change `size` in `configs/advanced.yaml` from 350 to 128 and run `make ingest` again. The collection name changes
-   (`orca_461716c917` becomes another id) and the points go from 216 to 301 (checked). Why does a new chunk size create a new
+   (`rag_461716c917` becomes another id) and the points go from 216 to 301 (checked). Why does a new chunk size create a new
    collection instead of overwriting? (`Profile.collection_name` hashes the model and chunking settings.) Change it back afterwards.
 
 ## Stretch

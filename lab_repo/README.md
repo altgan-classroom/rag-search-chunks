@@ -1,6 +1,6 @@
 # RAG ingestion lab: put 5 files into a vector database, then look inside it
 
-**Time:** 10 minutes for Part 1, plus 10 to 15 for Part 2 (optional).
+**Time:** about 15 minutes for Part 1 (in the session); Part 2 is a take-home task (30 to 45 minutes).
 **What you will see:** documents of five different types become searchable vectors in Qdrant, and you check the result
 three ways: container logs, a verification command, and the Qdrant dashboard. Then you break things on purpose to see
 what the design does about it.
@@ -9,7 +9,7 @@ what the design does about it.
 * **Docker Desktop is running** (the whale icon says "Engine running") and `docker compose version` works.
 * **Git** is installed.
 * Docker has **4 GB of memory or more** (Docker Desktop, Settings, Resources).
-* Internet is needed for step 2 only (building the image). Do step 2 at home if you can: the build downloads about 1 GB.
+* Internet is needed for step 2 only (building the image: about 1 GB, 2 to 5 minutes or more on slow wifi). **Start step 2 first** and read on while it builds.
 
 Every command below is one line. Copy it, run it from the project folder, read what it prints.
 
@@ -50,7 +50,7 @@ ingested  Q3_Board_Update.pptx        pages=  4 skip=  0 chunks=   4
 ingested  Safety_Manual.pdf           pages=  1 skip=  0 chunks=   1
 ingested  Sales_Pipeline_2026.xlsx    pages=  3 skip=  0 chunks=   3
 ingested  Supplier_Contacts.csv       pages=  1 skip=  0 chunks=   1
-profile=advanced collection=orca_461716c917 total=1s stats={'points': 25, 'status': 'green'}
+profile=advanced collection=rag_461716c917 total=1s stats={'points': 25, 'status': 'green'}
 ```
 Notice: the slide deck became **4 chunks** (one per slide) and the workbook **3** (one per sheet), so an answer can cite
 "slide 3". A line `Warning: RapidOCR is missing` is harmless (it is about scanned pages; there are none here).
@@ -61,7 +61,7 @@ docker compose run --rm verify
 ```
 Expected:
 ```
-collection  orca_461716c917  status=green  points_count=25
+collection  rag_461716c917  status=green  points_count=25
 vectors     dense: size=384 distance=COSINE, sparse: ['sparse']
 by kind     child=10 (searchable, have vectors)  parent=10 (context text, no vectors)  doc=5 (one manifest per file)
 sample point ...
@@ -93,96 +93,22 @@ duplicates. Try it: copy one more file of yours into `data/raw` (PDF, DOCX, PPTX
 
 ---
 
-## Part 2: break it on purpose (optional)
+## Part 2: break it on purpose (take-home task)
 
-A production system is judged by how it behaves when things go wrong. Here ingestion runs through a **queue** (Redis) and
-**workers**, the way it would at scale.
+Part 2 is for you to do after the session, at your own pace (30 to 45 minutes). Ingestion runs through a **queue** (Redis) and
+**workers**, and you cause four failures yourself and check what the system does:
 
-### 8. A corrupt file must not stop the good ones
-```
-docker compose run --rm challenge
-```
-The folder `challenge/` holds one good HTML file and one corrupt PDF. Expected: the HTML line says `ingested`, the PDF line says
-`failed ... FileDataError`, the command exits with an error code, and the good file is in the database. A bad document fails
-once, alone, and is not retried (retrying cannot fix it).
+1. a **corrupt file** next to good ones;
+2. the **database going down** while jobs are waiting;
+3. **more workers** (1, 2, then 4): how much faster?
+4. **killing the workers** in the middle of work.
 
-### 9. Start the queue and one worker
-```
-docker compose --profile queue up -d redis worker
-```
-```
-docker compose run --rm enqueue
-```
-`enqueue` puts one job per file on the queue; the worker takes them. Expected: `done in 0.6s status={'unchanged': 5}`.
-
-### 10. Take the database down while jobs are running
-```
-docker compose stop qdrant
-```
-```
-docker compose run --rm enqueue /data/raw --force
-```
-```
-docker compose logs worker --tail 10
-```
-The worker log shows `Retry in 4s ...`: the jobs are not lost and not marked as done; they wait and retry with growing delays.
-Now bring the database back:
-```
-docker compose start qdrant
-```
-```
-docker compose logs worker --tail 20
-```
-Within a minute every job shows `succeeded`. Run `docker compose run --rm verify`: the same counts as before, nothing
-duplicated, nothing missing.
-
-### 11. Scale out
-Create 120 small distinct documents and process them with one worker, then two, then four (do the first one now):
-```
-docker compose --profile queue up -d --scale worker=1 redis worker
-```
-```
-docker compose run --rm enqueue /data/load --synthetic 120 --wait
-```
-Note the time. Then add workers and repeat with `--force` so the work is the same each time:
-```
-docker compose --profile queue up -d --scale worker=2 redis worker
-```
-```
-docker compose run --rm enqueue /data/load --synthetic 120 --force --wait
-```
-The last line lists **which worker handled how many jobs**. Reference numbers from a 4-CPU Docker setup: 1 worker 71 s,
-2 workers 37 s, 4 workers 23 s. Your numbers depend on the CPUs Docker may use (Settings, Resources); once workers outnumber your
-CPUs, more workers stop helping. Each worker is capped to one CPU thread on purpose: without that cap a single worker already
-uses every core and extra workers only compete with each other (we measured it get *slower*).
-
-### 12. Kill the workers hard
-```
-docker compose run --rm enqueue /data/load --force
-```
-```
-docker compose kill worker
-```
-```
-docker compose --profile queue up -d --scale worker=2 redis worker
-```
-```
-docker compose exec redis redis-cli llen celery
-```
-```
-docker compose exec redis redis-cli hlen unacked
-```
-Run the last two a few times over three minutes. `llen celery` is the **waiting jobs**: it drains to 0 in about a minute.
-`hlen unacked` is **jobs that were running when the worker died**: they stay for about 150 seconds (the lab's setting), then the queue
-hands them to a worker again. Finally `docker compose run --rm verify` shows the same counts as before: **no lost jobs, no duplicates.**
-(In production that wait is set to hours, because it must be longer than your slowest job.)
-
-**What you just saw:** bad input is isolated, a dependency outage is retried, extra workers add throughput until the CPU is full,
-and a crashed worker's jobs come back. That is why ingestion is built as idempotent jobs on a queue, not a script.
+Everything you need is in **`docs/TAKE_HOME_PART2.pdf`**: the commands, what you should see, how to verify each result,
+a troubleshooting table and reflection questions. Predict first, then run.
 
 ---
 
-## Clean up (please do this)
+## Clean up (after Part 2, or now if you are skipping it)
 ```
 docker compose --profile queue down -v --rmi local
 ```
