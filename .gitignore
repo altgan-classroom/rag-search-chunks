@@ -185,3 +185,4 @@ orca_env
 output/
 .ruff_cache/
 .DS_Storereports/
+slides/ref/
