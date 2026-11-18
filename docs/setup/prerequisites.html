@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Orca RAG: install Docker, Python and Node.js</title>
+<style>
+@page { size: A4; margin: 14mm 14mm 16mm; }
+:root { --navy:#101150; --acc:#2f27e7; --muted:#4b4f87; --card:#f4f3ff; --line:#d9d7f5; }
+* { box-sizing: border-box; }
+body { font: 10.2pt/1.45 -apple-system, "Segoe UI", Verdana, sans-serif; color:#1b1c3a; margin:0; }
+h1 { color:var(--navy); font-size:20pt; margin:0 0 2px; }
+h2 { color:var(--navy); font-size:14pt; margin:18px 0 6px; border-bottom:2px solid var(--acc); padding-bottom:3px; page-break-after:avoid; }
+h3 { color:var(--acc); font-size:11pt; margin:12px 0 4px; page-break-after:avoid; }
+p { margin:4px 0; }
+.sub { color:var(--muted); margin-bottom:8px; }
+.brand { color:var(--navy); font-weight:700; letter-spacing:.5px; }
+table { border-collapse:collapse; width:100%; margin:6px 0; page-break-inside:avoid; }
+th { background:var(--navy); color:#fff; text-align:left; padding:5px 7px; font-size:9.2pt; }
+td { padding:5px 7px; border-bottom:1px solid var(--line); vertical-align:top; font-size:9.4pt; }
+tr:nth-child(even) td { background:var(--card); }
+pre { background:var(--navy); color:#e6e4ff; padding:7px 10px; border-radius:6px; font:9pt/1.4 Menlo, Consolas, monospace; margin:5px 0; white-space:pre-wrap; page-break-inside:avoid; }
+code { background:var(--card); padding:1px 4px; border-radius:3px; font:9pt Menlo, Consolas, monospace; }
+.box { background:var(--card); border-left:4px solid var(--acc); padding:7px 10px; margin:7px 0; border-radius:4px; page-break-inside:avoid; }
+.warn { background:#fff3e0; border-left-color:#c26a00; }
+.ok { background:#e6f5ee; border-left-color:#0f8f5b; }
+.m { display:inline-block; font-size:8pt; font-weight:700; padding:1px 6px; border-radius:9px; background:var(--acc); color:#fff; margin-right:4px; }
+.m.rec { background:#0f8f5b; }
+ul, ol { margin:4px 0 4px 18px; padding:0; }
+li { margin:2px 0; }
+.pb { page-break-before:always; }
+a { color:var(--acc); }
+</style></head><body>
+
+<div class="brand">AltGAN.</div>
+<h1>Before Session 1: install Docker, Python and Node.js</h1>
+<p class="sub">Orca RAG project setup · Windows 10/11 and macOS · allow 30 to 60 minutes (Docker is the slow one)</p>
+
+<div class="box"><b>Do this before the session.</b> Everything below is free. If one method fails, try the next one for the same tool, then post
+the exact error message (a screenshot) in the group. Do not skip the final checklist (section 5).</div>
+
+<h2>1. What you need and why</h2>
+<table>
+<tr><th style="width:17%">Tool</th><th style="width:20%">Version</th><th>Why we need it in the RAG project</th></tr>
+<tr><td><b>Python</b></td><td>3.12 recommended (3.11 or newer works)</td><td>Runs the ingestion code, the search CLI and the API. The first lab (ingest 58 PDFs) needs only Python, git and <code>make</code>.</td></tr>
+<tr><td><b>Docker</b></td><td>Docker Desktop, current release</td><td>Runs Qdrant (vector database), Redis (task queue), the API and the worker as one stack in later sessions.</td></tr>
+<tr><td><b>Node.js + npm</b></td><td>LTS: 22 or 24 (npm comes with it)</td><td>Builds and runs the React web UI (<code>npm ci</code>, <code>npm run dev</code>).</td></tr>
+<tr><td><b>Git</b> (bonus)</td><td>any recent</td><td>To clone the project repository. Install it too if the check below says it is missing.</td></tr>
+</table>
+<p><b>Your laptop:</b> 8 GB RAM or more is comfortable (Docker is given about 4 GB), and about 10 GB of free disk. Windows: 64-bit Windows 10 or 11 with virtualization enabled. Mac: Apple silicon or Intel, on a macOS release that Docker still supports (check the Docker link at the end).</p>
+
+<h2>2. Check what you already have (1 minute)</h2>
+<p>Open <b>Terminal</b> (Mac) or <b>PowerShell</b> (Windows) and run:</p>
+<pre>python3 --version      # Windows: python --version   (or: py --version)
+node --version
+npm --version
+docker --version
+git --version</pre>
+<p>Anything that prints a version at or above the table is done. A "command not found" or "is not recognized" message means install that tool. On Windows, a plain <code>python</code> that opens the Microsoft Store means Python is not installed yet (see Troubleshooting).</p>
+
+<h2 class="pb">3. Windows 10 / 11</h2>
+<p><b>Order matters a little:</b> Docker first (it asks for a restart), then Python, then Node.js, then Git. Use <b>PowerShell</b>, not the old Command Prompt.</p>
+
+<h3>3.1 Docker Desktop</h3>
+<p>Docker Desktop needs the Windows feature <b>WSL 2</b> (a light Linux layer) and CPU virtualization turned on. Docker Desktop is free for personal use, education and learning, and small businesses (under 250 employees and under USD 10 million revenue). Larger companies need a paid plan, so if you are on a work laptop from a large company, use your personal machine or ask your IT team.</p>
+<p><span class="m rec">Recommended</span> <b>Method A: winget (command line, fastest)</b>. Open PowerShell as Administrator (right-click, Run as administrator):</p>
+<pre>wsl --install
+winget install -e --id Docker.DockerDesktop</pre>
+<p>Restart Windows when asked, then open <b>Docker Desktop</b> from the Start menu, accept the terms, and wait until the whale icon says "Engine running". If <code>wsl --install</code> says WSL is already installed, run <code>wsl --update</code> instead.</p>
+<p><span class="m">Method B</span> <b>Official installer.</b> Download "Docker Desktop for Windows" from docker.com (the AMD64 build for normal laptops, ARM64 only for Snapdragon laptops), run the installer, keep "Use WSL 2 instead of Hyper-V" ticked, restart, open Docker Desktop.</p>
+<p><span class="m">Method C</span> <b>Alternative if Docker Desktop will not run:</b> Rancher Desktop or Podman Desktop also work with the project's compose files, but we can only help with Docker Desktop in the sessions.</p>
+<div class="box warn"><b>If it fails with "virtualization is disabled" / "WSL 2 requires..."</b>: restart the PC, open BIOS/UEFI (usually F2, F10, Del or Esc at the logo), and enable <b>Intel VT-x / AMD-V (SVM Mode)</b>. Check in Task Manager, Performance, CPU: "Virtualization: Enabled". On Windows 10/11 <i>Home</i> this is fine, WSL 2 is what Docker uses.</div>
+<p><b>Give Docker enough memory:</b> Docker Desktop, Settings, Resources: at least 4 GB (with WSL 2 it follows WSL; if you hit memory errors, create <code>%UserProfile%\.wslconfig</code> containing <code>[wsl2]</code> then <code>memory=4GB</code>, then run <code>wsl --shutdown</code>).</p>
+
+<h3>3.2 Python 3.12</h3>
+<p><span class="m rec">Recommended</span> <b>Method A: winget</b></p>
+<pre>winget install -e --id Python.Python.3.12</pre>
+<p>Close and reopen PowerShell, then run <code>python --version</code>. If it prints 3.12.x you are done.</p>
+<p><span class="m">Method B</span> <b>python.org installer.</b> Download the Windows installer from python.org/downloads (3.12.x). On the very first screen <b>tick "Add python.exe to PATH"</b> before pressing Install Now. Forgot? Run the installer again, choose Modify, and tick the environment variables option.</p>
+<p><span class="m">Method C</span> <b>Python Install Manager</b> (python.org's newer tool): install "Python Install Manager" from python.org/downloads/windows (or <code>winget install 9NQ7512CXL7T</code>), then:</p>
+<pre>py install 3.12
+py -3.12 --version</pre>
+<p>With this method you start Python with <code>py</code>. If you use it, tell us, because a few lab commands say <code>python</code>.</p>
+<div class="box warn"><b>Typing <code>python</code> opens the Microsoft Store?</b> Windows has a placeholder. Turn it off: Settings, Apps, Advanced app settings, <b>App execution aliases</b>, switch off the two "python.exe / python3.exe" entries, reopen PowerShell. Avoid the Microsoft Store build of Python for this course.</div>
+
+<h3>3.3 Node.js + npm (LTS)</h3>
+<p><span class="m rec">Recommended</span> <b>Method A: winget</b></p>
+<pre>winget install -e --id OpenJS.NodeJS.LTS</pre>
+<p><span class="m">Method B</span> <b>Official installer:</b> nodejs.org, download the <b>LTS</b> "Windows Installer (.msi)", keep the defaults (it adds Node to PATH), reopen PowerShell.</p>
+<p><span class="m">Method C</span> <b>Version manager fnm</b> (handy if you juggle several projects): <code>winget install Schniz.fnm</code>, reopen PowerShell, then <code>fnm install 22</code> and <code>fnm use 22</code>.</p>
+<div class="box warn"><b>"npm.ps1 cannot be loaded because running scripts is disabled"</b>: run once <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code> and answer Y, or run npm from Command Prompt.</div>
+
+<h3>3.4 Git (and make)</h3>
+<pre>winget install -e --id Git.Git</pre>
+<p>The lab uses <code>make</code>, which Windows does not have. You do not need it: the lab guide lists the plain commands for each make target. If you want <code>make</code> anyway: <code>winget install ezwinports.make</code> (reopen PowerShell). Prefer a Linux-like setup? <code>wsl --install</code> gives you Ubuntu where everything works as on macOS, and Docker Desktop's WSL integration can be switched on in its Settings. The Windows route of the lab has not been tested by the instructors, so tell us what you hit.</p>
+
+<h2 class="pb">4. macOS</h2>
+<p>Everything works on Apple silicon (M1/M2/M3/M4) and Intel Macs, but download the matching Docker build. Check yours: Apple menu, About This Mac ("Chip: Apple..." or "Processor: Intel").</p>
+
+<h3>4.0 Command line tools (git and make)</h3>
+<pre>xcode-select --install</pre>
+<p>A window appears; click Install and wait. This gives <code>git</code> and <code>make</code>. (Skip it if <code>git --version</code> already works.)</p>
+
+<h3>4.1 Docker Desktop</h3>
+<p><span class="m rec">Recommended</span> <b>Method A: official installer.</b> From docker.com download "Docker Desktop for Mac" for <b>Apple silicon</b> or <b>Intel</b>, open the .dmg, drag Docker to Applications, start it, accept the terms, and enter your Mac password when it asks to install its helper. Wait until it shows "Engine running". Free for personal use, education and small businesses (see the Windows note above).</p>
+<p><span class="m">Method B</span> <b>Homebrew:</b> <code>brew install --cask docker-desktop</code>. Homebrew renamed this cask from <code>docker</code>; run <code>brew update</code> first. On some Homebrew versions the cask fails with a definition error; if you see that, use Method A.</p>
+<p><span class="m">Method C</span> <b>Lightweight alternatives:</b> Colima or OrbStack, if Docker Desktop is too heavy for your Mac:</p>
+<pre>brew install colima docker docker-compose
+colima start --memory 4</pre>
+<p><b>Memory:</b> Docker Desktop, Settings, Resources, Memory: set at least 4 GB.</p>
+
+<h3>4.2 Python 3.12</h3>
+<p>The Python that ships with macOS or the command line tools can be old (3.9), which is too old for this project. Check with <code>python3 --version</code>; install 3.12 if it prints less than 3.11.</p>
+<p><span class="m rec">Recommended</span> <b>Method A: python.org installer.</b> Download the macOS 64-bit universal2 installer (3.12.x) from python.org/downloads, open the .pkg, click through. Then <b>open a new Terminal</b> and run <code>python3 --version</code>.</p>
+<p><span class="m">Method B</span> <b>Homebrew:</b></p>
+<pre>brew install python@3.12
+python3.12 --version</pre>
+<p>If <code>python3</code> still shows an old version, use <code>python3.12</code> explicitly, or add to <code>~/.zshrc</code>: <code>export PATH="$(brew --prefix python@3.12)/libexec/bin:$PATH"</code>, then open a new Terminal.</p>
+<p><span class="m">Method C</span> <b>uv</b> (a fast Python tool): <code>brew install uv</code> then <code>uv python install 3.12</code>.</p>
+<p>No Homebrew yet? Install it from brew.sh (one command shown on the home page), then follow the instructions it prints at the end to add <code>brew</code> to your PATH.</p>
+
+<h3>4.3 Node.js + npm (LTS)</h3>
+<p><span class="m rec">Recommended</span> <b>Method A: official installer.</b> nodejs.org, download the <b>LTS</b> macOS installer (.pkg), click through, open a new Terminal.</p>
+<p><span class="m">Method B</span> <b>Homebrew:</b></p>
+<pre>brew install node@22
+brew link --overwrite --force node@22</pre>
+<p>(<code>node@22</code> is installed "keg-only", so the second command is what puts <code>node</code> and <code>npm</code> on your PATH.)</p>
+<p><span class="m">Method C</span> <b>nvm</b> (version manager): follow the install command on github.com/nvm-sh/nvm, open a new Terminal, then <code>nvm install --lts</code>.</p>
+
+<h2>5. Final checklist: send us a screenshot</h2>
+<p>All of these should work in a <b>new</b> terminal window:</p>
+<table>
+<tr><th style="width:36%">Command</th><th>You should see</th></tr>
+<tr><td><code>python3 --version</code> (Windows: <code>python --version</code>)</td><td>Python 3.11.x or 3.12.x (or newer)</td></tr>
+<tr><td><code>node --version</code> and <code>npm --version</code></td><td>v22.x or v24.x, and a number for npm</td></tr>
+<tr><td><code>docker --version</code></td><td>Docker version 2x.x.x</td></tr>
+<tr><td><code>docker compose version</code></td><td>Docker Compose version v2.x</td></tr>
+<tr><td><code>docker run --rm hello-world</code></td><td>"Hello from Docker!" (needs Docker Desktop running and internet)</td></tr>
+<tr><td><code>git --version</code></td><td>git version 2.x</td></tr>
+</table>
+<div class="box ok"><b>Done?</b> Post a screenshot of that terminal in the group. Then the repository link will be shared before the session; you do not need to clone anything yet.</div>
+
+<h2>6. Troubleshooting</h2>
+<table>
+<tr><th style="width:36%">Problem</th><th>Fix</th></tr>
+<tr><td><code>docker: command not found</code> / "cannot connect to the Docker daemon"</td><td>Docker Desktop is not running. Open it and wait for "Engine running". On Windows, also check WSL: <code>wsl --status</code>.</td></tr>
+<tr><td>Docker Desktop stuck on "starting" (Windows)</td><td><code>wsl --update</code>, then <code>wsl --shutdown</code>, restart Docker Desktop. Confirm virtualization is enabled in BIOS.</td></tr>
+<tr><td>Docker is very slow or containers get killed</td><td>Raise memory to 4 GB or more (Docker Settings, Resources). Close other heavy apps.</td></tr>
+<tr><td><code>python</code> or <code>pip</code> not recognized (Windows)</td><td>Reopen PowerShell. Still failing: rerun the Python installer, Modify, tick "Add Python to environment variables". Also check the Store alias note in 3.2.</td></tr>
+<tr><td><code>python3 --version</code> shows 3.9 or 3.10 (Mac)</td><td>Install 3.12 (section 4.2) and use <code>python3.12</code>, or fix PATH as shown, then open a new Terminal.</td></tr>
+<tr><td><code>node</code> or <code>npm</code> not found after install</td><td>Close and reopen the terminal. On Mac with Homebrew, run the <code>brew link</code> line.</td></tr>
+<tr><td><code>npm ci</code> fails with permission errors</td><td>Do not use sudo. Reinstall Node from nodejs.org (or use nvm/fnm), which installs into your user folder.</td></tr>
+<tr><td>Corporate laptop with proxy / admin rights missing</td><td>Use a personal machine, or ask IT to install Docker Desktop, Python and Node for you. Tell us early.</td></tr>
+</table>
+
+<h2>7. Official sources (check these if a step has changed)</h2>
+<ul>
+<li>Docker Desktop for Windows: docs.docker.com/desktop/setup/install/windows-install</li>
+<li>Docker Desktop for Mac: docs.docker.com/desktop/setup/install/mac-install</li>
+<li>WSL: learn.microsoft.com/windows/wsl/install</li>
+<li>Python: python.org/downloads (Windows: python.org/downloads/windows)</li>
+<li>Node.js: nodejs.org/en/download</li>
+<li>Git: git-scm.com/downloads · Homebrew: brew.sh</li>
+</ul>
+<p class="sub">Version numbers move quickly; if a download page offers a newer Python 3.x or Node LTS than this guide says, ask in the group before upgrading past what the table lists.</p>
+</body></html>
