@@ -48,8 +48,9 @@ scores, so they are comparable within one query only.
    (`acl_filter` in `src/orca_rag/store/qdrant_store.py`: the filter runs inside the vector query.)
 2. Why did the first search return one `MB-104` document for `acme` and a different one for `globex`?
 3. Open `datasets/synthetic/manifest.json` and add `"tenant": "acme"` to a file of your own; ingest it and find it.
-4. Change `size` in `configs/advanced.yaml` from 350 to 128 and run `make ingest` with `--force`
-   (`python -m orca_rag.cli ingest datasets/synthetic --force`). How many points are there now? Why?
+4. Change `size` in `configs/advanced.yaml` from 350 to 128 and run `make ingest` again. The collection name changes
+   (`orca_461716c917` becomes another id) and the points go from 216 to 301 (checked). Why does a new chunk size create a new
+   collection instead of overwriting? (`Profile.collection_name` hashes the model and chunking settings.) Change it back afterwards.
 
 ## Stretch
 `ORCA_LLM__MOCK=true make serve` starts the API on :8080 with an offline extractive answerer, and `web/orca`
