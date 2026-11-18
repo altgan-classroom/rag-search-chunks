@@ -7,6 +7,8 @@ Every technique is a switch in a `Profile` (`configs/*.yaml`), has a code locati
 ## Ingestion
 | technique | what / why | code | knob | cost | needs LLM |
 |---|---|---|---|---|---|
+| Multi-format parsers | DOCX, PPTX (slides, notes, charts), XLSX, CSV, HTML tables, EML, images (OCR), behind one registry | `ingestion/formats.py`, `parsers.py:register` | `docs/FORMATS.md` | ~0 | no |
+| Hard page boundaries | slides and sheets are never merged into one chunk, so citations name one slide/sheet | `chunkers.py:_pack(hard_pages)` | `meta["hard_pages"]` | ~0 | no |
 | Layout-aware parsing | markdown with headings and real tables (pymupdf4llm) instead of flattened text | `ingestion/parsers.py` | n/a | CPU | no |
 | OCR with quality gate | OCR text-less pages; **exclude** garbage pages instead of indexing OCR noise; numbers/ids count as valid text | `parsers.py:text_quality` | `min quality` | CPU (Tesseract) | no |
 | Running header/footer removal | recurring page furniture pollutes BM25/embeddings | `parsers.py:strip_running_lines` | `frac` | ~0 | no |
@@ -48,3 +50,12 @@ Every technique is a switch in a `Profile` (`configs/*.yaml`), has a code locati
 ## Where a technique does **not** pay (measured, see COMPARISON)
 Parent-child adds context cost without retrieval gain on short documents; a cross-encoder can *hurt* multi-hop unless
 blended; MMR hurts versioned corpora unless it respects the reranker. Treat each as a hypothesis the ablation must confirm.
+
+## Extension points (swap a part without touching the rest)
+| part | contract | add one | proof it works |
+|---|---|---|---|
+| file format | `Parser` (`exts`, `parse()`) in `ingestion/parsers.py` | `register(MyParser())` | planted-fact fixture + test (`docs/FORMATS.md`) |
+| vector database | `VectorStore` in `store/base.py` (10 methods) | `register_store("name", factory)`, `ORCA_STORE_BACKEND=name` | `tests/unit/test_store_contract.py` runs the same tests on Qdrant and the in-memory reference store |
+| reranker | `Reranker` in `retrieval/rerank.py` | `register_reranker("prefix/", factory)` | any `rerank.model` starting with the prefix |
+| dense embeddings | `DenseEmbedder` in `store/embedders.py` | `dense_model: litellm:<provider/model>` (hosted) or any fastembed id | `orca variants` on your data |
+| LLM | LiteLLM model id in the profile | change `generation.model` | `ORCA_LLM__MOCK=true` for offline work |

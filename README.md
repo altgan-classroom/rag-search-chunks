@@ -4,6 +4,8 @@ A production-shaped reference for RAG over unstructured documents, **rebuilt fro
 change measured**. The original template is preserved at `git tag baseline`; `git diff baseline..HEAD` is the
 difference, and `docs/COMPARISON.md` says which of those differences actually improved retrieval, by how much, and at what cost.
 
+* **Many file types**: PDF, DOCX, PPTX (slides, notes, charts), XLSX, CSV, HTML, e-mail, images (OCR): one registry, one verified fixture per format (`docs/FORMATS.md`).
+* **Modular**: parsers, vector store, reranker and embedders are swappable behind small protocols with contract tests (`docs/TECHNIQUES.md`, "Extension points").
 * **Advanced ingestion**: layout-aware parsing, OCR with a quality gate, structure-aware/parent-child chunking, idempotent
   versioned indexing.
 * **Advanced retrieval**: hybrid dense + sparse, query understanding, cross-encoder reranking with blend, MMR, parent expansion,
@@ -28,7 +30,7 @@ With a provider key (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, ... via LiteLLM) set
 
 ## Read next
 `docs/REVIEW.md` (what was wrong with the template, with file:line) → `docs/ARCHITECTURE.md` → `docs/TECHNIQUES.md` →
-`docs/COMPARISON.md` (the evidence) → `docs/CHOOSING.md` (vector DB / embedding / chunk size) → `docs/DOMAIN_EVAL.md`
+`docs/FORMATS.md` → `docs/COMPARISON.md` (the evidence) → `docs/CHOOSING.md` (vector DB / embedding / chunk size) → `docs/DOMAIN_EVAL.md`
 (build your own eval) → `docs/PRODUCTION.md` → `docs/DATASETS.md`.
 
 ## Honest limits

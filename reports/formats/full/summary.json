@@ -14,15 +14,15 @@
    "n": 15
   },
   "best_score": {
-   "mean": 3.1049,
-   "lo": -0.3927,
-   "hi": 6.065,
+   "mean": 3.4769,
+   "lo": 0.015,
+   "hi": 6.3589,
    "n": 16
   },
   "context_tokens": {
-   "mean": 525.6875,
-   "lo": 501.25,
-   "hi": 550.6875,
+   "mean": 354.875,
+   "lo": 318.375,
+   "hi": 390.375,
    "n": 16
   },
   "doc_recall@1": {
@@ -128,9 +128,9 @@
    "n": 15
   },
   "retrieval_ms": {
-   "mean": 620.2897,
-   "lo": 602.5799,
-   "hi": 636.9353,
+   "mean": 620.254,
+   "lo": 614.4774,
+   "hi": 625.9842,
    "n": 16
   }
  },
@@ -141,11 +141,11 @@
     "n": 3
    },
    "best_score": {
-    "mean": 8.4857,
+    "mean": 8.8745,
     "n": 3
    },
    "context_tokens": {
-    "mean": 551.3333,
+    "mean": 384.6667,
     "n": 3
    },
    "doc_recall@1": {
@@ -217,7 +217,7 @@
     "n": 3
    },
    "retrieval_ms": {
-    "mean": 619.3311,
+    "mean": 615.0105,
     "n": 3
    }
   },
@@ -227,11 +227,11 @@
     "n": 5
    },
    "best_score": {
-    "mean": 5.6977,
+    "mean": 6.5817,
     "n": 5
    },
    "context_tokens": {
-    "mean": 489.0,
+    "mean": 360.0,
     "n": 5
    },
    "doc_recall@1": {
@@ -303,7 +303,7 @@
     "n": 5
    },
    "retrieval_ms": {
-    "mean": 607.6984,
+    "mean": 627.9064,
     "n": 5
    }
   },
@@ -317,7 +317,7 @@
     "n": 1
    },
    "context_tokens": {
-    "mean": 486.0,
+    "mean": 402.0,
     "n": 1
    },
    "doc_recall@1": {
@@ -389,7 +389,7 @@
     "n": 1
    },
    "retrieval_ms": {
-    "mean": 561.8042,
+    "mean": 613.723,
     "n": 1
    }
   },
@@ -399,11 +399,11 @@
     "n": 6
    },
    "best_score": {
-    "mean": 2.9303,
+    "mean": 2.9843,
     "n": 6
    },
    "context_tokens": {
-    "mean": 536.5,
+    "mean": 326.5,
     "n": 6
    },
    "doc_recall@1": {
@@ -475,21 +475,21 @@
     "n": 6
    },
    "retrieval_ms": {
-    "mean": 638.9933,
+    "mean": 613.8152,
     "n": 6
    }
   },
   "unanswerable": {
    "best_score": {
-    "mean": -11.284,
+    "mean": -11.2425,
     "n": 1
    },
    "context_tokens": {
-    "mean": 607.0,
+    "mean": 363.0,
     "n": 1
    },
    "retrieval_ms": {
-    "mean": 632.385,
+    "mean": 642.886,
     "n": 1
    }
   }

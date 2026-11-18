@@ -26,8 +26,8 @@
 |---|---|---|
 | `config` | `Env` (deployment, secrets as `SecretStr`) and `Profile` (the RAG *recipe*, YAML) | recipe ≠ deployment: the same code runs `baseline` and `advanced` |
 | `llm` | LiteLLM gateway, offline mock, usage accounting | model ids only come from config; no provider in code |
-| `ingestion` | parsers, chunkers, enrichment, idempotent pipeline, Celery tasks | content-addressed ids, versioning, parse cache |
-| `store` | Qdrant store + embedders (fastembed ONNX) | explicit collection, named vectors, payload indexes, ACL filter |
+| `ingestion` | parser registry + format parsers (PDF, DOCX, PPTX, XLSX, CSV, HTML, EML, images), chunkers, enrichment, idempotent pipeline, Celery tasks | content-addressed ids, versioning, parse cache; see `docs/FORMATS.md` |
+| `store` | `VectorStore` protocol (`base.py`), Qdrant backend, in-memory reference backend, embedders (fastembed ONNX, optional LiteLLM-hosted) | explicit collection, named vectors, payload indexes, ACL filter; backend chosen by `ORCA_STORE_BACKEND` |
 | `retrieval` | query understanding, fusion, rerank, MMR, pipeline | every step traced with timings |
 | `generation` | prompts, context builder, grounding verifier, answerer | abstains instead of improvising |
 | `agentic` | corrective retrieval as a LlamaIndex Workflow | bounded rounds, RRF-merged |
