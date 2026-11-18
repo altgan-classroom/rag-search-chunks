@@ -90,10 +90,39 @@ class FastEmbedDense:
             return next(iter(self._m.embed([self._qp + text]))).tolist()
 
 
+class LiteLLMDense:
+    """Hosted embeddings through LiteLLM (OpenAI, Voyage, Cohere, Gemini, Bedrock, ...): `dense_model: "litellm:<provider/model>"`,
+    e.g. `litellm:openai/text-embedding-3-small`. Provider keys come from the usual env vars. NOT benchmarked in this repo (no
+    key in CI): run `orca variants` with it on your own data before trusting it. Texts leave your network; changing the
+    model means re-embedding everything (collection name includes the model id)."""
+
+    def __init__(self, model: str, doc_prefix: str = "", query_prefix: str = "", batch: int = 64):
+        self.name, self.model, self._batch = model, model.removeprefix("litellm:"), batch
+        self._dp, self._qp = doc_prefix, query_prefix
+        self.dim = len(self._call(["probe"])[0])
+
+    def _call(self, texts: list[str]) -> list[list[float]]:
+        import litellm
+
+        r = litellm.embedding(model=self.model, input=texts, drop_params=True)
+        return [d["embedding"] for d in sorted(r["data"], key=lambda d: d["index"])]
+
+    def embed_docs(self, texts):
+        out: list[list[float]] = []
+        for i in range(0, len(texts), self._batch):
+            out += self._call([self._dp + t for t in texts[i : i + self._batch]])
+        return out
+
+    def embed_query(self, text):
+        return self._call([self._qp + text])[0]
+
+
 @lru_cache(maxsize=8)
 def get_dense(model: str, doc_prefix: str = "", query_prefix: str = "") -> DenseEmbedder:
     if model.startswith("hash:"):
         return HashDense(int(model.split(":")[1]))
+    if model.startswith("litellm:"):
+        return LiteLLMDense(model, doc_prefix, query_prefix)
     return FastEmbedDense(model, doc_prefix, query_prefix)
 
 

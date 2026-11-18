@@ -79,3 +79,19 @@ def test_backend_selection_by_name():
     assert isinstance(make_store(Env(store_backend="memory"), PROF), MemoryStore)
     with pytest.raises(ValueError, match="unknown store backend"):
         make_store(Env(store_backend="nope"), PROF)
+
+
+def test_hosted_embeddings_via_litellm_are_routed_and_batched(monkeypatch):
+    import litellm
+    from orca_rag.store.embedders import LiteLLMDense, get_dense
+    calls = []
+
+    def fake(model, input, **kw):
+        calls.append((model, len(input)))
+        return {"data": [{"index": i, "embedding": [float(len(t)), 1.0, 0.0]} for i, t in enumerate(input)][::-1]}  # out of order
+
+    monkeypatch.setattr(litellm, "embedding", fake)
+    e = get_dense("litellm:openai/text-embedding-3-small")
+    assert isinstance(e, LiteLLMDense) and e.dim == 3
+    vecs = e.embed_docs(["a", "bb", "ccc"])
+    assert [v[0] for v in vecs] == [1.0, 2.0, 3.0] and calls[-1][0] == "openai/text-embedding-3-small"
