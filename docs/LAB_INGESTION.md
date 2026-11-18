@@ -1,12 +1,12 @@
 # Lab: run your first ingestion
 
 Goal: index 58 PDFs on your own laptop and search them, as two different users. **No API key, no Docker, no GPU.**
-Verified from a clean `git archive` export of this repo (fresh venv): install 28 s with a warm pip cache and 264 s cold;
+Verified from clean `git archive` exports of this repo (fresh venv, literal `make install`): install 28 s with a warm pip cache and 234-264 s cold;
 first ingest 49 s including a one-off ~64 MB model download; re-ingest 1 s. Disk: about 0.9 GB (venv 0.8 GB, data 65 MB).
 
 ## 0. Prerequisites
 * Python **3.11 or newer** (`python3 --version`). `make install` uses `python3`; if yours is older, install 3.11 first.
-* `make` and `git`. Internet on the first run only (to fetch the embedding models from Hugging Face).
+* `make` and `git`. Tesseract is not needed for this corpus (checked: all 58 files ingest with it off the PATH). Internet on the first run only (to fetch the embedding models from Hugging Face).
 
 ## 1. Install
 ```bash
@@ -32,6 +32,14 @@ Parser notices such as "RapidOCR is missing / Using Tesseract" are printed per f
 
 Run `make ingest` again: every file reports `unchanged` and the run takes about a second. Ingestion is idempotent: ids are
 derived from content, so re-running never duplicates anything.
+
+No `make` (Windows, or a minimal image)? Every make target is one command. After activating the venv
+(`.venv/bin/python`, or `.venv\Scripts\python` on Windows, which I have not tested) run, from the repo root:
+```bash
+python -m orca_rag.cli ingest datasets/synthetic
+python -m orca_rag.cli --tenant acme search "What is the total depth of well MB-104?"
+python -m orca_rag.cli --tenant acme search "compensation bands" --groups group:hr
+```
 
 ## 3. Search, as different users
 ```bash

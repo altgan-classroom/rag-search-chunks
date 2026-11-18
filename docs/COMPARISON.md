@@ -164,5 +164,7 @@ re-run it on your own vectors (`python -m orca_rag.eval.vector_bench`) before ch
 
 ## 6. Caveats
 Small n (CIs reported); one machine, CPU contention during runs inflates latency and index times; small ONNX models only;
-retrieval-only metrics; model-authored gold needing human review; the real corpus is CO₂ storage, not hydrocarbon
+retrieval-only metrics; model-authored gold needing human review; **abstention is not benchmarked, and with the reranker off
+(`advanced.yaml`) there is no relevance-score gate: an unanswerable question relies on the grounded prompt and the grounding check
+(with the offline mock, which is extractive, it simply returns the nearest passages)**; the real corpus is CO₂ storage, not hydrocarbon
 production; the Qdrant benchmark uses synthetic vectors; sweeps are single runs without intervals.
