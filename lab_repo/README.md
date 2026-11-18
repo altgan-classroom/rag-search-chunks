@@ -1,4 +1,4 @@
-# Orca ingestion lab: put 5 files into a vector database, then look inside it
+# RAG ingestion lab: put 5 files into a vector database, then look inside it
 
 **Time:** 10 minutes for Part 1, plus 10 to 15 for Part 2 (optional).
 **What you will see:** documents of five different types become searchable vectors in Qdrant, and you check the result
@@ -20,7 +20,7 @@ Every command below is one line. Copy it, run it from the project folder, read w
 ### 1. Get the project
 ```
 git clone <REPO URL from the chat>
-cd orca-ingestion-lab
+cd rag-ingest-docs
 ```
 Look around: `data/raw` holds the 5 files you will ingest (a Word file, a PowerPoint, an Excel sheet, a CSV and a PDF).
 
@@ -187,7 +187,7 @@ and a crashed worker's jobs come back. That is why ingestion is built as idempot
 docker compose --profile queue down -v --rmi local
 ```
 This removes this lab's containers, its Qdrant data and queue, and the image it built. It only touches things named
-`orca-lab`. Check:
+`rag-ingest-docs`. Check:
 ```
 docker compose ps -a
 ```
