@@ -20,7 +20,7 @@ COPY --from=build /opt/venv /opt/venv
 COPY configs /app/configs
 WORKDIR /app
 ENV PATH="/opt/venv/bin:$PATH" PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
-    ORCA_DATA_DIR=/data FASTEMBED_CACHE_PATH=/data/models HF_HOME=/data/hf
+    ORCA_HOME=/app ORCA_DATA_DIR=/data FASTEMBED_CACHE_PATH=/data/models HF_HOME=/data/hf
 RUN mkdir -p /data && chown -R orca:orca /data /app
 USER orca
 EXPOSE 8080

@@ -18,7 +18,17 @@ import yaml
 from pydantic import BaseModel, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-ROOT = Path(__file__).resolve().parents[3]
+def _find_root() -> Path:
+    """Where `configs/` and `data/` live. In a source checkout that is three levels above this file; in a container the
+    package is installed into site-packages, so that guess is wrong and ORCA_HOME (set by the Dockerfile) points at it.
+    Last resort: the working directory."""
+    if os.environ.get("ORCA_HOME"):
+        return Path(os.environ["ORCA_HOME"]).resolve()
+    here = Path(__file__).resolve().parents[3]
+    return here if (here / "configs").is_dir() else Path.cwd()
+
+
+ROOT = _find_root()
 
 
 # --------------------------------------------------------------------------- recipe (profile)
