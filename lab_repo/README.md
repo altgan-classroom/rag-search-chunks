@@ -109,15 +109,24 @@ a troubleshooting table and reflection questions. Predict first, then run.
 ---
 
 ## Clean up (after Part 2, or now if you are skipping it)
+Use the cleanup script in the project folder. It removes only what this lab created: its containers, its database data and queue, the image it
+built (about 1 GB) and the files generated in `data/load`. It asks before it deletes anything.
+
+macOS or Linux (in a terminal, inside the project folder):
+```
+sh cleanup.sh
+```
+Windows: double-click **`cleanup.bat`**, or in a terminal inside the project folder:
+```
+cleanup.bat
+```
+(Add `-y` to skip the question.) It ends by listing anything left for this project: the list should be empty.
+
+The same thing as one command, if you prefer:
 ```
 docker compose --profile queue down -v --rmi local
 ```
-This removes this lab's containers, its Qdrant data and queue, and the image it built. It only touches things named
-`rag-ingested-docs`. Check:
-```
-docker compose ps -a
-```
-should list nothing. To delete the project folder, remove it like any folder.
+To run the lab again later you need `docker compose build` once more. To delete the project folder, remove it like any folder.
 
 ## If something goes wrong
 | symptom | fix |
