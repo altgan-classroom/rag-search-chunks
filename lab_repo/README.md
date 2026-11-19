@@ -20,7 +20,7 @@ Every command below is one line. Copy it, run it from the project folder, read w
 ### 1. Get the project
 ```
 git clone <REPO URL from the chat>
-cd rag-ingest-docs
+cd rag-ingested-docs
 ```
 Look around: `data/raw` holds the 5 files you will ingest (a Word file, a PowerPoint, an Excel sheet, a CSV and a PDF).
 
@@ -113,7 +113,7 @@ a troubleshooting table and reflection questions. Predict first, then run.
 docker compose --profile queue down -v --rmi local
 ```
 This removes this lab's containers, its Qdrant data and queue, and the image it built. It only touches things named
-`rag-ingest-docs`. Check:
+`rag-ingested-docs`. Check:
 ```
 docker compose ps -a
 ```

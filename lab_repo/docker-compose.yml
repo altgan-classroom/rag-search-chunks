@@ -1,9 +1,9 @@
 # RAG ingestion lab. Own project name, so `docker compose down -v` here can never touch anything else on your machine.
-name: rag-ingest-docs
+name: rag-ingested-docs
 
 x-app: &app
   build: {context: .}
-  image: rag-ingest-docs:latest
+  image: rag-ingested-docs:latest
   environment: &env
     ORCA_QDRANT__URL: http://qdrant:6333
     ORCA_LLM__MOCK: "true"                 # no LLM is needed to ingest or to search
