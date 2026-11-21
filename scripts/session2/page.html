@@ -1,0 +1,422 @@
+<title>Inside RAG Retrieval</title>
+<meta charset="utf-8">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* layout concept: a lab bench. A sticky debug checklist on top, six tabs below, each tab = one claim, one visual you can poke, one source line. */
+:root{
+  --bg:#f8f8fc; --panel:#ffffff; --ink:#15173d; --muted:#585b86; --line:#dcdcee; --accent:#3b35d4; --accent-soft:#ecebff;
+  --good:#0f8a58; --good-soft:#e4f4ec; --warn:#b86200; --warn-soft:#fff1de; --bad:#c0392b; --bad-soft:#fdeceb; --teal:#0e7c86; --amber:#c27a00;
+  --code:#eef0ff; --heat0:#f1f1fb; --heat1:#3b35d4;
+  --f-head:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e0f23; --panel:#161838; --ink:#ecedff; --muted:#a3a6d8; --line:#2b2e63; --accent:#908bff; --accent-soft:#25276a;
+  --good:#42c689; --good-soft:#12342a; --warn:#f0a443; --warn-soft:#3a2b12; --bad:#ff7b6b; --bad-soft:#3d1c1f; --teal:#4cc4ce; --amber:#f0b84a;
+  --code:#1f2152; --heat0:#1c1e48; --heat1:#908bff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e0f23; --panel:#161838; --ink:#ecedff; --muted:#a3a6d8; --line:#2b2e63; --accent:#908bff; --accent-soft:#25276a;
+  --good:#42c689; --good-soft:#12342a; --warn:#f0a443; --warn-soft:#3a2b12; --bad:#ff7b6b; --bad-soft:#3d1c1f; --teal:#4cc4ce; --amber:#f0b84a;
+  --code:#1f2152; --heat0:#1c1e48; --heat1:#908bff; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+.wrap{max-width:1120px;margin:0 auto}
+header{padding:22px 0 8px}
+h1{font:700 30px/1.15 var(--f-head);margin:0 0 6px;text-wrap:balance;letter-spacing:-.01em}
+h2{font:700 21px/1.25 var(--f-head);margin:0 0 6px;text-wrap:balance}
+h3{font:600 15px/1.3 var(--f-head);margin:0 0 6px}
+.sub{color:var(--muted);margin:0;max-width:70ch}
+.check{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px}
+.step{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:7px 11px;font-size:13px;cursor:pointer;display:flex;gap:8px;align-items:center;color:var(--muted)}
+.step b{font:600 12px var(--f-mono);color:var(--muted)}
+.step.seen{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+.step.seen b{color:var(--accent)}
+.step:focus-visible,.tab:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:14px 0 18px;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:6px}
+.tab{background:none;border:0;border-bottom:3px solid transparent;padding:9px 12px;font:500 14px var(--f-body);color:var(--muted);cursor:pointer}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px;min-width:0}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr))}
+.grid>*{min-width:0}
+.note{font-size:13px;color:var(--muted)}
+.src{font-size:12.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;margin-top:12px}
+.src b{color:var(--ink)}
+.tag{display:inline-block;font:500 11px var(--f-mono);padding:2px 7px;border-radius:5px;background:var(--code);color:var(--ink)}
+.tag.good{background:var(--good-soft);color:var(--good)} .tag.bad{background:var(--bad-soft);color:var(--bad)} .tag.warn{background:var(--warn-soft);color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--f-body);color:var(--muted)}
+.scroll{overflow-x:auto}
+code,.mono{font-family:var(--f-mono);font-size:12.5px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+button.b{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:7px;padding:6px 10px;font:500 13px var(--f-body);cursor:pointer}
+button.b[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent)}
+select,input[type=range]{font:13px var(--f-body);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px}
+input[type=range]{padding:0;accent-color:var(--accent)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-block;font:500 13px var(--f-mono);padding:4px 8px;margin:2px;border-radius:6px;background:var(--code);border:1px solid var(--line)}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 12px;border-radius:0 8px 8px 0;margin:10px 0;font-size:14px}
+.callout.warn{border-color:var(--warn);background:var(--warn-soft)}
+.callout.good{border-color:var(--good);background:var(--good-soft)}
+.hit{display:grid;grid-template-columns:28px 1fr auto;gap:8px;padding:7px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;font-size:13px;background:var(--panel)}
+.hit.gold{border-color:var(--good);background:var(--good-soft)}
+.hit .rk{font:600 12px var(--f-mono);color:var(--muted)}
+.hit .t{color:var(--muted);font-size:12px;margin-top:2px}
+.badge{font:500 11px var(--f-mono);padding:1px 6px;border-radius:4px;background:var(--code);margin-left:4px;white-space:nowrap}
+svg{max-width:100%;height:auto;display:block}
+svg text{fill:var(--ink);font-family:var(--f-body)}
+.chunk{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:13px;background:var(--panel);white-space:pre-wrap;overflow-wrap:anywhere}
+.chunk .meta{font:500 11px var(--f-mono);color:var(--muted);margin-bottom:4px;white-space:normal}
+mark{background:var(--warn-soft);color:var(--ink);border-bottom:2px solid var(--warn);padding:0 1px}
+mark.b{background:var(--good-soft);border-bottom-color:var(--good)}
+.bar{height:14px;border-radius:4px;background:var(--accent)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:6px 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.vec{display:grid;grid-template-columns:repeat(48,1fr);gap:1px}
+.vec i{display:block;height:14px}
+@media (prefers-reduced-motion:no-preference){.panel{animation:fade .25s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+footer{padding:20px 0 40px;color:var(--muted);font-size:12.5px}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Inside RAG retrieval</h1>
+  <p class="sub">Session 2 visual lab. Every number on the Embeddings, Chunking and Search arena tabs was computed with bge-small and BM25 on a small invented policy corpus, and is shown as it came out. Click things.</p>
+  <div class="check" id="check" aria-label="Debug checklist"></div>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="view"></main>
+<footer>Invented policies, no real data. The 2-D map and the graph walk are illustrations, not measurements; each says so where it appears.</footer>
+</div>
+
+<script type="application/json" id="data">/*DATA*/</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const $ = (s, el = document) => el.querySelector(s);
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v; else if (k === "html") e.innerHTML = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v === true) e.setAttribute(k, ""); else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) e.append(k.nodeType ? k : document.createTextNode(k));
+  return e;
+}
+const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const fmt = (x, n = 3) => (x == null ? "none" : Number(x).toFixed(n));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+const STEPS = [
+  ["1", "Read the exact chunks sent", "arena"],
+  ["2", "Check the chunking", "chunking"],
+  ["3", "Check the embeddings", "embeddings"],
+  ["4", "Check search settings", "hood"],
+  ["5", "Only then the model", "preview"],
+];
+const TABS = [["anatomy", "1 · A stored point"], ["embeddings", "2 · Text to numbers"], ["chunking", "3 · Where to cut"], ["hood", "4 · Finding neighbours"], ["arena", "5 · Search arena"], ["preview", "6 · What is next"]];
+const TABSTEP = { anatomy: null, embeddings: 2, chunking: 1, hood: 3, arena: 0, preview: 4 };
+const seen = new Set();
+
+function drawChecklist() {
+  const c = $("#check"); c.innerHTML = "";
+  STEPS.forEach(([n, label, tab], i) => c.append(h("button", { class: "step" + (seen.has(i) ? " seen" : ""), onclick: () => show(tab) }, h("b", {}, n), label)));
+}
+function drawTabs(active) {
+  const t = $("#tabs"); t.innerHTML = "";
+  TABS.forEach(([id, label]) => t.append(h("button", { class: "tab", role: "tab", "aria-selected": id === active ? "true" : "false", onclick: () => show(id) }, label)));
+}
+function show(id) {
+  if (!VIEWS[id]) id = "anatomy";
+  history.replaceState(null, "", "#" + id);
+  if (TABSTEP[id] != null) seen.add(TABSTEP[id]);
+  if (id === "hood") seen.add(3);
+  drawChecklist(); drawTabs(id);
+  const v = $("#view"); v.innerHTML = ""; v.append(VIEWS[id]());
+  window.scrollTo({ top: 0 });
+}
+
+/* ------------------------------------------------------------------ 1 anatomy */
+const FIELD_MEANING = {
+  doc_id: "id of the whole file (from its fingerprint)", doc_name: "file name, shown in citations", source_key: "file name, used to detect re-ingestion", tenant: "whose data this is",
+  acl: "who may see it (filtered inside the search)", version: "1 until the file changes", doc_year: "year guessed from the name or first page", doc_type: "type guessed from the name; other = no rule matched",
+  kind: "child = searchable; parent = context; doc = manifest", chunk_ord: "position in the document", page_start: "first page / slide / sheet", page_end: "last page / slide / sheet",
+  section: "heading path above this chunk", is_table: "chunk is a table, kept whole", tokens: "size in tokens", content_hash: "fingerprint of the text", context: "optional model-written summary (empty here)", parent_id: "link to the larger parent section",
+};
+function vAnatomy() {
+  const A = D.anatomy, root = h("div");
+  root.append(h("div", { class: "panel" },
+    h("h2", {}, "One stored point, opened"),
+    h("p", { class: "sub" }, "This is the child point for slide 3 of the board update from Session 1: the same one the verify command printed. A point is an id, two vectors and a payload of labels.")));
+  const g = h("div", { class: "grid" });
+  const rows = Object.entries(A.payload).map(([k, v]) => h("tr", {}, h("td", { class: "mono" }, k), h("td", { class: "mono" }, JSON.stringify(v)), h("td", { class: "note" }, FIELD_MEANING[k] || "")));
+  g.append(h("div", { class: "panel" }, h("h3", {}, "Payload (the labels)"), h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "field"), h("th", {}, "value"), h("th", {}, "meaning")), rows))));
+  const right = h("div", { class: "panel" });
+  right.append(h("h3", {}, "Dense vector: 384 numbers"), h("p", { class: "note" }, "Each square is one number (blue = positive, orange = negative). First six: ", h("code", {}, A.dense_first6.join(", ")), ". The length of the whole vector is 1."));
+  const max = Math.max(...A.dense.map(Math.abs));
+  const vec = h("div", { class: "vec" });
+  A.dense.forEach((x, i) => { const a = Math.min(1, Math.abs(x) / max); vec.append(h("i", { title: `#${i}: ${x}`, style: `background:${x >= 0 ? `rgba(59,53,212,${.15 + a * .85})` : `rgba(230,120,20,${.15 + a * .85})`}` })); });
+  right.append(vec, h("h3", { style: "margin-top:16px" }, "Sparse vector: " + A.sparse.length + " non-zero words"), h("p", { class: "note" }, "Everything else is zero. Bar length = BM25 weight."));
+  const mx = Math.max(...A.sparse.map(s => s.value));
+  A.sparse.slice().sort((a, b) => b.value - a.value).forEach(s => right.append(h("div", { class: "row", style: "gap:8px;margin:2px 0" }, h("span", { class: "mono", style: "width:150px;overflow:hidden;text-overflow:ellipsis" }, s.word), h("div", { class: "bar", style: `width:${(s.value / mx) * 55}%;min-width:6px` }), h("span", { class: "note mono" }, s.value))));
+  g.append(right); root.append(g);
+  root.append(h("div", { class: "panel" }, h("h3", {}, "What was actually embedded"),
+    h("p", { class: "note" }, "Not just the chunk text. The program adds the document name and the section in front, so look-alike tables from different files stay distinguishable:"),
+    h("div", { class: "chunk" }, A.embed_text),
+    h("div", { class: "callout" }, "Debug lesson: when a chunk is retrieved or missed, ask what text was embedded, not only what text is displayed."),
+    h("div", { class: "src" }, h("b", {}, "Source: "), "recomputed with bge-small and BM25 from the Session 1 lab file. The first six numbers match the lab's verify output exactly.")));
+  return root;
+}
+
+/* ------------------------------------------------------------------ 2 embeddings */
+const GCOL = { paraphrase: "#3b35d4", negation: "#c0392b", numbers: "#c27a00", ids: "#0e7c86", insurance: "#7a7fb0", unrelated: "#8a8a8a", query: "#0f8a58" };
+function vEmbeddings() {
+  const E = D.embeddings, items = E.items, n = items.length, root = h("div");
+  const cosAt = (i, j) => E.cos[i][j];
+  root.append(h("div", { class: "panel" }, h("h2", {}, "From text to numbers, and where the numbers mislead"),
+    h("p", { class: "sub" }, "bge-small turns each sentence into " + E.dim + " numbers. Closeness is cosine similarity: 1 means the same direction. Predict first, then click.")));
+  // tokens
+  const tk = h("div", { class: "panel" });
+  const sel = h("select", { id: "tokSel", "aria-label": "Text to split" }, Object.keys(D.tokens).map(k => h("option", { value: k }, k)));
+  const out = h("div");
+  const draw = () => { out.innerHTML = ""; const t = D.tokens[sel.value]; t.forEach(x => out.append(h("span", { class: "chip" }, x))); out.append(h("p", { class: "note" }, t.length + " pieces (including the two special markers). The model never sees letters, only these pieces; numbers inside codes are cut into fragments.")); };
+  sel.addEventListener("change", draw); draw();
+  tk.append(h("h3", {}, "Step 1: words become pieces"), h("div", { class: "row" }, sel), out); root.append(tk);
+  // pair finder
+  const pf = h("div", { class: "panel" });
+  const PRE = [["Paraphrase (same meaning, different words)", "A pipe burst and flooded the kitchen.", "Water escaped from a ruptured pipe and covered the kitchen floor."],
+    ["Opposites: covered / not covered", "Water damage from a burst pipe is covered.", "Water damage from a burst pipe is not covered."],
+    ["Numbers: $10,000 / $1,000", "The escape of water limit is $10,000 per claim.", "The escape of water limit is $1,000 per claim."],
+    ["IDs: HP-2026-0417 / HP-2026-0471", "Policy HP-2026-0417 covers the main dwelling.", "Policy HP-2026-0471 covers the main dwelling."],
+    ["Claim codes: CL-4471 / CL-4417", "Claim code CL-4471 is used for water damage.", "Claim code CL-4417 is used for water damage."],
+    ["Unrelated topics", "A pipe burst and flooded the kitchen.", "A recipe for lentil soup needs onions and cumin."]];
+  const idx = t => items.findIndex(x => x.text === t);
+  const selA = h("select", { "aria-label": "Sentence A" }, items.map((x, i) => h("option", { value: i }, x.text)));
+  const selB = h("select", { "aria-label": "Sentence B" }, items.map((x, i) => h("option", { value: i }, x.text)));
+  const res = h("div");
+  const upd = () => { const a = +selA.value, b = +selB.value, c = cosAt(a, b); res.innerHTML = "";
+    res.append(h("div", { class: "row" }, h("div", { style: "font:700 34px var(--f-head);min-width:96px" }, c.toFixed(3)), h("div", { style: `flex:1;min-width:140px` }, h("div", { class: "bar", style: `width:${Math.max(2, c * 100)}%` }), h("div", { class: "note" }, "cosine similarity (0 = unrelated direction, 1 = identical)")))); };
+  selA.addEventListener("change", upd); selB.addEventListener("change", upd);
+  const setPair = (a, b) => { selA.value = idx(a); selB.value = idx(b); upd(); };
+  pf.append(h("h3", {}, "Step 2: how close are two sentences?"), h("div", { class: "btns" }, PRE.map(p => h("button", { class: "b", onclick: () => setPair(p[1], p[2]) }, p[0]))), h("div", { class: "grid" }, h("label", {}, "A ", selA), h("label", {}, "B ", selB)), res);
+  setPair(PRE[1][1], PRE[1][2]);
+  const pairs = [];
+  PRE.forEach(p => pairs.push({ label: p[0], c: cosAt(idx(p[1]), idx(p[2])) }));
+  pairs.sort((a, b) => b.c - a.c);
+  const chart = h("div", { style: "margin-top:12px" }, h("h3", {}, "The same pairs, ranked by score"));
+  pairs.forEach(p => chart.append(h("div", { class: "row", style: "gap:8px;margin:3px 0" }, h("span", { style: "width:min(250px,40%);font-size:13px" }, p.label), h("div", { class: "bar", style: `width:${p.c * 45}%;min-width:6px;${p.c < .6 ? "background:var(--muted)" : ""}` }), h("span", { class: "mono" }, p.c.toFixed(3)))));
+  pf.append(chart, h("div", { class: "callout warn" }, h("b", {}, "Surprise to talk about: "), "the opposite statements score higher than the true paraphrase, and a one-digit change in an ID barely moves the score. A high score means 'same topic and wording shape', not 'same answer'."));
+  root.append(pf);
+  // heatmap
+  const hm = h("div", { class: "panel" }); hm.append(h("h3", {}, "Step 3: everything against everything"), h("p", { class: "note" }, "Rows and columns are the 24 sentences plus the 5 questions (green), numbered. Brighter = more similar. Hover a cell for the pair, click it to compare above."));
+  const cell = 19, pad = 30, size = pad + n * cell;
+  const mn = Math.min(...E.cos.slice(0, n).flatMap(r => r.slice(0, n)));
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("viewBox", `0 0 ${size} ${size}`); svg.style.maxWidth = (size * 1.1) + "px";
+  const mk = (tag, a) => { const e = document.createElementNS(NS, tag); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  const hot = css("--heat1"), cold = css("--heat0");
+  const mix = (t) => { const p = x => parseInt(x, 16), a = hot.replace("#", ""), b = cold.replace("#", ""); const c = [0, 2, 4].map(i => Math.round(p(b.substr(i, 2)) + (p(a.substr(i, 2)) - p(b.substr(i, 2))) * t)); return `rgb(${c})`; };
+  const info = h("div", { class: "note", style: "min-height:42px;margin-top:6px" }, "Hover a cell.");
+  for (let i = 0; i < n; i++) {
+    const lab = mk("text", { x: pad - 4, y: pad + i * cell + 13, "text-anchor": "end", "font-size": 9 }); lab.textContent = i + 1; svg.append(lab);
+    const lab2 = mk("text", { x: pad + i * cell + cell / 2, y: pad - 6, "text-anchor": "middle", "font-size": 9 }); lab2.textContent = i + 1; svg.append(lab2);
+    for (let j = 0; j < n; j++) {
+      const t = (E.cos[i][j] - mn) / (1 - mn);
+      const r = mk("rect", { x: pad + j * cell, y: pad + i * cell, width: cell - 1, height: cell - 1, fill: mix(t), rx: 2 });
+      r.addEventListener("mouseenter", () => { info.textContent = `${i + 1}. "${items[i].text}"  vs  ${j + 1}. "${items[j].text}"  =  ${E.cos[i][j].toFixed(3)}`; });
+      r.addEventListener("click", () => { selA.value = i; selB.value = j; upd(); });
+      svg.append(r);
+    }
+  }
+  const lg = h("div", { class: "legend" }); const groups = [...new Set(items.slice(0, n).map(x => x.group))];
+  groups.forEach(g => lg.append(h("span", {}, h("span", { class: "dot", style: `background:${GCOL[g]}` }), g)));
+  hm.append(h("div", { class: "scroll" }, svg), info, h("ol", { class: "note", style: "columns:2 280px;margin:8px 0 0;padding-left:22px" }, items.slice(0, n).map(x => h("li", { style: `color:${GCOL[x.group]}` }, h("span", { style: "color:var(--ink)" }, x.text)))), lg);
+  hm.append(h("div", { class: "src" }, h("b", {}, "Source: "), `computed with ${E.model}, ${E.dim} dimensions, on invented sentences. Scores are specific to this model; they are not probabilities.`));
+  root.append(hm);
+  // map
+  const mp = h("div", { class: "panel" }); mp.append(h("h3", {}, "Step 4: a map, and a query landing on it"), h("p", { class: "note" }, "Click any point or star. The five nearest sentences by cosine appear on the right."));
+  const W = 560, H = 380, pm = 28; const xs = E.pca.map(p => p[0]), ys = E.pca.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const sx = v => pm + (v - x0) / (x1 - x0) * (W - 2 * pm), sy = v => H - pm - (v - y0) / (y1 - y0) * (H - 2 * pm);
+  const svg2 = document.createElementNS(NS, "svg"); svg2.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const nn = h("div", { class: "note" }, "Nothing selected."); let selIdx = null; const pts = [];
+  const choose = k => { selIdx = k; const order = items.map((_, j) => j).filter(j => j !== k).sort((a, b) => cosAt(k, b) - cosAt(k, a)).slice(0, 5); nn.innerHTML = "";
+    nn.append(h("div", { style: "font-weight:600;margin-bottom:6px" }, `"${items[k].text}"`), order.map(j => h("div", { class: "hit", style: "grid-template-columns:1fr auto" }, h("span", {}, items[j].text), h("span", { class: "mono" }, cosAt(k, j).toFixed(3)))));
+    pts.forEach((p, i) => p.setAttribute("stroke", i === k ? css("--ink") : "none")); };
+  items.forEach((it, k) => { const q = it.group === "query"; const c = mk(q ? "path" : "circle", q ? { d: "M0,-8 L2.4,-2.4 L8,-2 L3.6,1.6 L5,7.4 L0,4.2 L-5,7.4 L-3.6,1.6 L-8,-2 L-2.4,-2.4 Z", transform: `translate(${sx(E.pca[k][0])},${sy(E.pca[k][1])})` } : { cx: sx(E.pca[k][0]), cy: sy(E.pca[k][1]), r: 6 });
+    c.setAttribute("fill", GCOL[it.group]); c.setAttribute("stroke-width", 2); c.style.cursor = "pointer"; c.addEventListener("click", () => choose(k)); const tt = mk("title", {}); tt.textContent = it.text; c.append(tt); pts.push(c); svg2.append(c);
+    if (!q) { const l = mk("text", { x: sx(E.pca[k][0]) + 8, y: sy(E.pca[k][1]) + 3, "font-size": 9 }); l.textContent = k + 1; svg2.append(l); } });
+  const lg2 = h("div", { class: "legend" }); groups.forEach(g => lg2.append(h("span", {}, h("span", { class: "dot", style: `background:${GCOL[g]}` }), g === "query" ? "questions (stars)" : g)));
+  mp.append(h("div", { class: "grid" }, h("div", {}, svg2, lg2), nn));
+  mp.append(h("div", { class: "callout warn" }, h("b", {}, "Caveat: "), `this 2-D map keeps only ${(100 * (E.pca_explained[0] + E.pca_explained[1])).toFixed(0)}% of the variation in the ${E.dim} numbers (the two largest directions, from a principal component analysis). Distances on it are distorted: use it to see neighbourhoods, not to measure similarity. The lists on the right are exact.`));
+  root.append(mp);
+  return root;
+}
+
+/* ------------------------------------------------------------------ 3 chunking */
+let CK = { recipe: "fixed", q: "q1", k: 3 };
+function vChunking() {
+  const C = D.chunking, root = h("div"); const R = C.recipes;
+  root.append(h("div", { class: "panel" }, h("h2", {}, "Where the cut falls decides what the model can see"),
+    h("p", { class: "sub" }, "One home policy, cut four ways. Then ask a question and see which chunks come back. The question needs two facts that sit in one clause: the $10,000 limit and the 48-hour exclusion.")));
+  const out = h("div"); const ctl = h("div", { class: "panel" });
+  const rb = h("div", { class: "btns" }); const qsel = h("select", { "aria-label": "Question" }, C.questions.map(q => h("option", { value: q.id }, q.id + " · " + q.question + "  (" + q.kind + ")")));
+  const ksl = h("input", { type: "range", min: 1, max: 8, value: CK.k, "aria-label": "Chunks sent to the model" }); const kl = h("span", { class: "mono" }, CK.k);
+  const render = () => {
+    [...rb.children].forEach(b => b.setAttribute("aria-pressed", b.dataset.k === CK.recipe ? "true" : "false"));
+    out.innerHTML = ""; const r = R[CK.recipe], q = C.questions.find(x => x.id === CK.q), pq = r.per_question[CK.q]; const k = CK.k;
+    // left: chunks of the home policy
+    const left = h("div", { class: "panel" }); left.append(h("h3", {}, "How the 2026 home policy was cut"), h("p", { class: "note" }, `${r.label}: ${r.chunks.filter(c => c.doc === "HomePolicy_HP-2026-0417").length} chunks for this document, ${r.n_chunks} across the six documents, ${r.avg_tokens} tokens on average.`));
+    const markRe = [/\$10,000 per claim/g, /48 consecutive hours/g];
+    r.chunks.filter(c => c.doc === "HomePolicy_HP-2026-0417").forEach(c => {
+      let t = esc(c.text).replace(markRe[0], m => `<mark class="b">${m}</mark>`).replace(markRe[1], m => `<mark>${m}</mark>`);
+      left.append(h("div", { class: "chunk" }, h("div", { class: "meta" }, `chunk ${c.ord} · ${c.tokens} tokens · ${c.chars} characters${c.is_table ? " · table" : ""}`), h("div", { html: t })));
+    });
+    left.append(h("div", { class: "note" }, h("mark", { class: "b" }, "limit"), " ", h("mark", {}, "exclusion"), " are highlighted so you can see whether they share a chunk."));
+    // right: retrieval
+    const right = h("div", { class: "panel" }); right.append(h("h3", {}, "What this question retrieves"), h("p", { class: "note" }, `"${q.question}"`));
+    const ok = pq.answer_in_context_at_k[k]; const mp = pq.markers_at_k[k];
+    right.append(h("div", { class: "callout " + (ok ? "good" : "warn") }, h("b", {}, ok ? "Answer is in the context. " : "Answer is NOT in the context. "), `Top ${k} chunk${k > 1 ? "s" : ""} sent to the model.`, h("div", { class: "note" }, "Needs: ", q.markers.map(m => h("span", { class: "badge", style: `color:${mp[m] ? "var(--good)" : "var(--bad)"}` }, (mp[m] ? "found: " : "missing: ") + m)))));
+    pq.hits.slice(0, 8).forEach((x, i) => right.append(h("div", { class: "hit" + (i < k ? "" : " dim") + (x.gold ? " gold" : ""), style: i < k ? "" : "opacity:.45" }, h("span", { class: "rk" }, "#" + (i + 1)), h("div", {}, h("div", {}, x.doc.replace(/_/g, " "), h("span", { class: "badge" }, (x.tokens || "?") + " tok"), x.gold ? h("span", { class: "tag good", style: "margin-left:6px" }, "has the answer") : null), h("div", { class: "t" }, x.text.replace(/\s+/g, " ").slice(0, 150) + "…")), h("span", { class: "mono" }, x.score.toFixed(2)))));
+    right.append(h("div", { class: "note" }, "Faded rows are ranked below your cut-off k."));
+    out.append(h("div", { class: "grid" }, left, right));
+    // summary table
+    const sm = h("div", { class: "panel" }); sm.append(h("h3", {}, `Across all ${C.questions.length} questions, with ${k} chunk${k > 1 ? "s" : ""} sent`));
+    const rows = Object.keys(R).map(key => { const n = C.questions.filter(qq => R[key].per_question[qq.id].answer_in_context_at_k[k]).length; return h("tr", {}, h("td", {}, R[key].label), h("td", { class: "mono" }, R[key].n_chunks), h("td", { class: "mono" }, R[key].avg_tokens), h("td", {}, h("div", { class: "row", style: "gap:8px" }, h("div", { class: "bar", style: `width:${n / C.questions.length * 100}%;min-width:4px;max-width:200px;background:${n === C.questions.length ? "var(--good)" : "var(--accent)"}` }), h("span", { class: "mono" }, n + "/" + C.questions.length)))); });
+    sm.append(h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "recipe"), h("th", {}, "chunks"), h("th", {}, "avg tokens"), h("th", {}, "questions whose answer is in the context")), rows)));
+    sm.append(h("div", { class: "callout" }, "Try k = 1, 3 and 8, and the question q1. The tiny chunks never bring the limit and the exclusion together; fixed windows need more chunks; keeping the clause whole, or searching small pieces but sending the parent section, gets there sooner. Sending more chunks costs tokens, so it is a trade."));
+    sm.append(h("div", { class: "src" }, h("b", {}, "Source: "), "computed with the project's chunker and hybrid search (bge-small + BM25, 20 candidates per branch) on six invented policies. The 2026 home clause is longer than the 500-character window on purpose, so a fixed cut must fall inside it. A constructed example, not a benchmark: on real reports the measured effect of structure-aware splitting was 51% to 79% of questions with the right passage in the top 5 (17 reports, 55 questions)."));
+    out.append(sm);
+  };
+  Object.entries(R).forEach(([k, r]) => rb.append(h("button", { class: "b", "data-k": k, onclick: () => { CK.recipe = k; render(); } }, r.label)));
+  qsel.value = CK.q; qsel.addEventListener("change", () => { CK.q = qsel.value; render(); });
+  ksl.addEventListener("input", () => { CK.k = +ksl.value; kl.textContent = CK.k; render(); });
+  ctl.append(h("div", { class: "row" }, h("b", {}, "Cut it:"), rb), h("div", { class: "row" }, h("label", {}, "Question ", qsel)), h("div", { class: "row" }, h("label", {}, "Chunks sent to the model (k): "), ksl, kl));
+  root.append(ctl, out); render(); return root;
+}
+
+/* ------------------------------------------------------------------ 4 how the database finds neighbours */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function toyIndex() {
+  const r = rng(11), P = [], cl = [[130, 90], [380, 80], [250, 190], [100, 270], [420, 260]];
+  for (let i = 0; i < 120; i++) { const c = cl[i % cl.length]; P.push([c[0] + (r() - .5) * 120 + (r() - .5) * 40, c[1] + (r() - .5) * 90 + (r() - .5) * 30]); }
+  const d = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]); const adj = P.map(() => new Set());
+  P.forEach((p, i) => { P.map((q, j) => [j, d(p, q)]).filter(x => x[0] !== i).sort((a, b) => a[1] - b[1]).slice(0, 5).forEach(([j]) => { adj[i].add(j); adj[j].add(i); }); });
+  const far = new Set(); for (let i = 0; i < P.length; i++) if (r() < 0.12) { const j = Math.floor(r() * P.length); if (j !== i) { adj[i].add(j); adj[j].add(i); far.add(i + "-" + j); } }  // a few long links, standing in for the highway layers of a real HNSW
+  return { P, adj, d, far };
+}
+function walk(T, q, ef) {
+  const { P, adj, d } = T, entry = 0, seen = new Set([entry]), dist = new Map([[entry, d(P[entry], q)]]), order = [entry];
+  let cand = [entry], best = [entry];
+  while (cand.length) {
+    cand.sort((a, b) => dist.get(a) - dist.get(b)); const c = cand.shift();
+    best.sort((a, b) => dist.get(a) - dist.get(b)); if (best.length >= ef && dist.get(c) > dist.get(best[ef - 1])) break;
+    for (const nb of adj[c]) if (!seen.has(nb)) { seen.add(nb); dist.set(nb, d(P[nb], q)); order.push(nb); if (best.length < ef || dist.get(nb) < dist.get(best[best.length - 1])) { cand.push(nb); best.push(nb); best.sort((a, b) => dist.get(a) - dist.get(b)); if (best.length > ef) best.pop(); } }
+  }
+  return { found: best[0], checked: seen.size, order };
+}
+function vHood() {
+  const root = h("div"); const T = toyIndex(), N = T.P.length;
+  root.append(h("div", { class: "panel" }, h("h2", {}, "How a database finds neighbours without checking everything"),
+    h("p", { class: "sub" }, "Exact search compares your query with every vector. An index trades a little accuracy for a lot of speed. Click the picture to place a query.")));
+  const NS = "http://www.w3.org/2000/svg", W = 520, H = 340; const mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  let q = [300, 140], ef = 3; const svg = mk("svg", { viewBox: `0 0 ${W} ${H}` }); svg.style.cursor = "crosshair"; svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Toy graph search on 120 points");
+  const info = h("div"); const sl = h("input", { type: "range", min: 1, max: 12, value: ef, "aria-label": "Search width (ef)" }); const efl = h("span", { class: "mono" }, ef);
+  const draw = () => {
+    svg.innerHTML = ""; const res = walk(T, q, ef); let tn = 0, td = 1e9; T.P.forEach((p, i) => { const dd = T.d(p, q); if (dd < td) { td = dd; tn = i; } });
+    T.adj.forEach((s, i) => s.forEach(j => { if (j > i) svg.append(mk("line", { x1: T.P[i][0], y1: T.P[i][1], x2: T.P[j][0], y2: T.P[j][1], stroke: css("--line"), "stroke-width": .7 })); }));
+    const vis = new Set(res.order); T.P.forEach((p, i) => svg.append(mk("circle", { cx: p[0], cy: p[1], r: vis.has(i) ? 4.5 : 3, fill: vis.has(i) ? css("--accent") : css("--muted"), opacity: vis.has(i) ? 1 : .45 })));
+    svg.append(mk("circle", { cx: T.P[tn][0], cy: T.P[tn][1], r: 8, fill: "none", stroke: css("--good"), "stroke-width": 2.5 }));
+    if (res.found !== tn) svg.append(mk("circle", { cx: T.P[res.found][0], cy: T.P[res.found][1], r: 8, fill: "none", stroke: css("--bad"), "stroke-width": 2.5, "stroke-dasharray": "3 2" }));
+    svg.append(mk("path", { d: "M0,-9 L2.7,-2.7 L9,-2.2 L4,1.8 L5.6,8.3 L0,4.7 L-5.6,8.3 L-4,1.8 L-9,-2.2 L-2.7,-2.7 Z", transform: `translate(${q[0]},${q[1]})`, fill: css("--amber") }));
+    info.innerHTML = ""; info.append(h("div", { class: "row" }, h("div", {}, h("div", { style: "font:700 30px var(--f-head)" }, N), h("div", { class: "note" }, "distance checks, exact search")), h("div", {}, h("div", { style: "font:700 30px var(--f-head);color:var(--accent)" }, res.checked), h("div", { class: "note" }, "distance checks, graph walk"))),
+      h("div", { class: "callout " + (res.found === tn ? "good" : "warn") }, res.found === tn ? "The graph walk found the true nearest neighbour (green ring)." : "The graph walk missed the true nearest neighbour (green ring). It returned the dashed red one. That is what 'approximate' means."));
+  };
+  svg.addEventListener("click", e => { const r = svg.getBoundingClientRect(); q = [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; draw(); });
+  sl.addEventListener("input", () => { ef = +sl.value; efl.textContent = ef; draw(); });
+  // recall table on random queries
+  const R = rng(5), qs = Array.from({ length: 300 }, () => [R() * W, R() * H]); const truth = qs.map(qq => { let b = 0, bd = 1e9; T.P.forEach((p, i) => { const dd = T.d(p, qq); if (dd < bd) { bd = dd; b = i; } }); return b; });
+  const tbl = [1, 2, 4, 8, 12].map(e => { let ok = 0, ch = 0; qs.forEach((qq, i) => { const r2 = walk(T, qq, e); ok += r2.found === truth[i]; ch += r2.checked; }); return [e, ok / qs.length, ch / qs.length]; });
+  root.append(h("div", { class: "grid" }, h("div", { class: "panel" }, h("h3", {}, "Toy graph walk"), svg, h("div", { class: "row" }, h("label", {}, "Search width ef "), sl, efl), h("div", { class: "legend" }, h("span", {}, h("span", { class: "dot", style: "background:var(--amber)" }), "query"), h("span", {}, h("span", { class: "dot", style: "background:var(--accent)" }), "points the walk checked"), h("span", {}, h("span", { class: "dot", style: "background:var(--muted)" }), "never checked"))),
+    h("div", { class: "panel" }, info, h("h3", { style: "margin-top:14px" }, "On 300 random queries"), h("table", {}, h("tr", {}, h("th", {}, "ef"), h("th", {}, "found the true nearest"), h("th", {}, "points checked")), tbl.map(x => h("tr", {}, h("td", { class: "mono" }, x[0]), h("td", { class: "mono" }, (x[1] * 100).toFixed(0) + "%"), h("td", { class: "mono" }, x[2].toFixed(0) + " of " + N)))), h("div", { class: "note" }, "A wider search checks more points and misses less."))));
+  root.append(h("div", { class: "src", style: "margin-top:-4px" }, h("b", {}, "Illustration: "), "a single-layer graph on 120 random 2-D points, each linked to its 5 nearest, plus a few long links standing in for the upper layers. Qdrant's HNSW stacks several layers (highways, then roads, then streets) on real 384-number vectors; the idea of walking from neighbour to closer neighbour is the same."));
+  // measured
+  const B = [["HNSW m=16, ef=32", 0.994, 4.2], ["HNSW m=16, ef=64", 1.0, 3.8], ["HNSW m=16, ef=128", 1.0, 4.2], ["HNSW m=16, ef=256", 1.0, 5.3], ["exact search (every vector)", 1.0, 8.6]];
+  const bt = h("div", { class: "panel" }, h("h3", {}, "Measured: 100,000 vectors, recall and speed"), h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "setting"), h("th", {}, "recall@10"), h("th", {}, "median ms")), B.map(x => h("tr", {}, h("td", {}, x[0]), h("td", { class: "mono" }, x[1].toFixed(3)), h("td", {}, h("div", { class: "row", style: "gap:8px" }, h("div", { class: "bar", style: `width:${x[2] * 18}px;background:${x[2] > 8 ? "var(--muted)" : "var(--accent)"}` }), h("span", { class: "mono" }, x[2]))))))));
+  bt.append(h("p", { class: "note" }, "Memory-saving: scalar quantization kept recall at 0.996 and was faster (3.9 ms against 5.2 ms). Binary quantization collapsed to 0.273 at 384 dimensions. Measure before you switch it on."),
+    h("div", { class: "src" }, h("b", {}, "Source: "), "docs/COMPARISON.md section 5. Qdrant v1.20.2 in Docker on a laptop CPU, 100,000 synthetic clustered vectors (not real embeddings), 384 dimensions, 200 queries, one run. Recall is measured against exact search."));
+  root.append(bt);
+  // filters
+  const fl = h("div", { class: "panel" }); const fs = h("input", { type: "range", min: 1, max: 50, value: 3, "aria-label": "Share of documents the user may see" }); const fo = h("div");
+  const fd = () => { const p = +fs.value / 100; const left = Math.round(10 * p * 10) / 10; fo.innerHTML = ""; fo.append(h("div", { class: "grid" },
+    h("div", { class: "callout warn" }, h("b", {}, "Retrieve 10, then remove forbidden: "), `about ${left} of the 10 are left, if the user's documents are spread evenly. A relevant allowed chunk ranked 11th is never seen.`),
+    h("div", { class: "callout good" }, h("b", {}, "Filter inside the search: "), "always 10, the best 10 of what this user may see. Forbidden text never leaves the database.")),
+    h("div", { class: "row" }, h("div", {}, h("div", { class: "note" }, "1%-selectivity filter, with a payload index"), h("div", { style: "font:700 26px var(--f-head);color:var(--good)" }, "3.6 ms")), h("div", {}, h("div", { class: "note" }, "same filter, no payload index"), h("div", { style: "font:700 26px var(--f-head);color:var(--bad)" }, "21.8 ms")))); };
+  fs.addEventListener("input", fd);
+  fl.append(h("h3", {}, "Filters belong inside the search"), h("div", { class: "row" }, h("label", {}, "The user may see ", h("span", { class: "mono" }, "x%"), " of documents: "), fs), fo, h("div", { class: "src" }, h("b", {}, "Source: "), "the left box is simple arithmetic under an even-spread assumption. The 3.6 ms and 21.8 ms are measured (100,000 synthetic vectors, 1% tenant filter); that is why tenant, acl and doc_id are indexed in the Session 1 collection."));
+  fd(); root.append(fl);
+  root.append(h("div", { class: "panel" }, h("h3", {}, "On your own machine: the Session 1 collection"), h("p", { class: "note" }, "Open the Qdrant dashboard, then the Info tab of your collection. You should see the settings below. With 25 points (15 KB of vectors) Qdrant has no need for a graph at all: it scans, because the thresholds are about 10,000 KB."), h("div", { class: "chunk" }, `vectors:  dense  size=384  distance=Cosine  hnsw m=16 ef_construct=128\nsparse:   sparse modifier=idf\nsegments_count: 2     points_count: 25\nindexing_threshold: 10000 (KB)    full_scan_threshold: 10000 (KB)`), h("div", { class: "src" }, h("b", {}, "Source: "), "read from the lab collection with the Qdrant REST API.")));
+  draw(); return root;
+}
+
+/* ------------------------------------------------------------------ 5 search arena */
+let AR = { q: "q3", depth: 20 };
+function vArena() {
+  const A = D.arena, root = h("div");
+  root.append(h("div", { class: "panel" }, h("h2", {}, "Search arena: meaning, keywords, or both"),
+    h("p", { class: "sub" }, "The same fourteen chunks, the same question, three ways to rank them. Pick a question, guess which column puts the right chunk first, then look. Green rows hold the answer.")));
+  const ctl = h("div", { class: "panel" }); const qs = Object.keys(A.questions);
+  const qsel = h("select", { "aria-label": "Question" }, qs.map(k => h("option", { value: k }, k + " · " + A.questions[k].question + "  (" + A.questions[k].kind + ")")));
+  const dsel = h("div", { class: "btns" }); const out = h("div");
+  const render = () => {
+    [...dsel.children].forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.d === AR.depth)));
+    out.innerHTML = ""; const e = A.questions[AR.q];
+    out.append(h("div", { class: "callout" }, h("b", {}, "Question: "), e.question, h("div", { class: "note" }, e.note)));
+    const cols = h("div", { class: "grid" }, [["dense", "Meaning (dense)"], ["sparse", "Keywords (BM25)"], ["hybrid", "Hybrid (both, fused)"]].map(([m, label]) => {
+      const mm = e.modes[`${m}|${AR.depth}`]; const c = h("div", { class: "panel" }); c.append(h("h3", {}, label), h("div", { class: "tag " + (mm.gold_rank === 1 ? "good" : mm.gold_rank ? "warn" : "bad") }, mm.gold_rank ? "answer chunk at rank " + mm.gold_rank : "answer chunk NOT in the top " + AR.depth));
+      c.append(h("div", { style: "height:8px" })); mm.rows.forEach(r => c.append(h("div", { class: "hit" + (r.gold ? " gold" : "") }, h("span", { class: "rk" }, "#" + r.rank), h("div", {}, h("div", {}, r.doc.replace(/_/g, " ")), h("div", { class: "t" }, r.text.replace(/\s+/g, " ").slice(0, 90) + "…"), m === "hybrid" ? h("div", { style: "margin-top:3px" }, h("span", { class: "badge" }, "dense #" + (r.dense_rank ?? "–")), h("span", { class: "badge" }, "BM25 #" + (r.sparse_rank ?? "–"))) : null), h("span", { class: "mono" }, r.score.toFixed(m === "sparse" ? 1 : 2)))));
+      return c; }));
+    out.append(cols);
+    const s = A.summary; const sm = h("div", { class: "panel" }); sm.append(h("h3", {}, `All ${A.questions.q1 ? Object.keys(A.questions).length : 0} questions, ${AR.depth} candidates per branch`));
+    sm.append(h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "ranking"), h("th", {}, "right chunk first"), h("th", {}, "in the top 5"), h("th", {}, "mean reciprocal rank")),
+      [["dense", "Meaning only"], ["sparse", "Keywords only (BM25)"], ["hybrid", "Hybrid"]].map(([m, l]) => { const v = s[`${m}|${AR.depth}`]; return h("tr", {}, h("td", {}, l), h("td", { class: "mono" }, v.first + "/" + v.n), h("td", { class: "mono" }, v.found_top5 + "/" + v.n), h("td", { class: "mono" }, v.mrr.toFixed(2))); }))));
+    const grid = h("div", { class: "scroll", style: "margin-top:12px" }); const tb = h("table", {}, h("tr", {}, h("th", {}, "question"), h("th", {}, "meaning"), h("th", {}, "keywords"), h("th", {}, "hybrid")));
+    Object.keys(A.questions).forEach(k => { const row = h("tr", {}, h("td", {}, k + " · " + A.questions[k].kind)); ["dense", "sparse", "hybrid"].forEach(m => { const r = A.questions[k].modes[`${m}|${AR.depth}`].gold_rank; row.append(h("td", { class: "mono", style: `color:${r === 1 ? "var(--good)" : r ? "var(--warn)" : "var(--bad)"};font-weight:600` }, r ? "#" + r : "not found")); }); tb.append(row); });
+    grid.append(h("div", { class: "note" }, "Rank of the right chunk for every question (#1 is best):"), tb); sm.append(grid);
+    sm.append(h("div", { class: "callout" }, h("b", {}, "What to notice. "), "Keywords put the right chunk first most often here, because most of these questions share words with the policies. Question q11 shares none: keywords find nothing at all (not found), while meaning search still gets it to #2. Hybrid never misses, but with equal weights its order sits between the two. Try candidate depth 5 and 20: on this small corpus it changes little; in the toy test below it mattered."));
+    sm.append(h("div", { class: "src" }, h("b", {}, "Source: "), `computed with bge-small + BM25 and the project's hybrid search (reciprocal rank fusion) on ${A.n_chunks} chunks from six invented policies, structure-aware, up to 150 tokens. With only ${A.n_chunks} chunks, 'in the top 5' is easy; look at first place and at the questions marked not found. Not a benchmark: no percentage here is a general result.`));
+    out.append(sm);
+  };
+  [5, 10, 20].forEach(d => dsel.append(h("button", { class: "b", "data-d": d, onclick: () => { AR.depth = d; render(); } }, d + " candidates per branch")));
+  qsel.value = AR.q; qsel.addEventListener("change", () => { AR.q = qsel.value; render(); });
+  ctl.append(h("div", { class: "row" }, h("label", {}, "Question ", qsel)), dsel); root.append(ctl, out);
+  const toy = h("div", { class: "panel" }, h("h3", {}, "Why keep keywords: a toy test with look-alike IDs"), h("p", { class: "note" }, "40 invented well chunks that differ only by their code (MB-101, MB-104, ...). Query: 'Which well has ID MB-xxx?' for each well."),
+    h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "case"), h("th", {}, "search"), h("th", {}, "right well first"), h("th", {}, "in the first 5"), h("th", {}, "score gap, 1st vs 2nd")),
+      [["A: short near-identical chunks", "Meaning only", "39/40", "40/40", "0.043"], ["", "Keywords only", "39/40", "40/40", "5.2"], ["", "Hybrid", "40/40", "40/40", "0.51"],
+       ["B: longer chunks, code is a small part", "Meaning only", "6/40", "20/40", "0.006"], ["", "Keywords only", "40/40", "40/40", "4.3"], ["", "Hybrid", "25/40", "40/40", "0.17"]].map(r => h("tr", {}, r.map((c, i) => h("td", { class: i > 1 ? "mono" : "" }, c)))))),
+    h("div", { class: "src" }, h("b", {}, "Source: "), "scripts/demo_exact_terms.py with bge-small and BM25, 20 candidates per branch, invented chunks. In case A meaning search is right but wins by a hair; in case B it misses half the time. Keep it as a pattern, not a percentage."));
+  root.append(toy); render(); return root;
+}
+
+/* ------------------------------------------------------------------ 6 preview */
+function vPreview() {
+  const root = h("div");
+  root.append(h("div", { class: "panel" }, h("h2", {}, "What can still go wrong after retrieval is right"),
+    h("p", { class: "sub" }, "A reranker re-reads the top candidates together with the question and re-sorts them. It can only reorder what search already found. Measured on the 17 real reports, 55 questions:")));
+  const data = [["Right chunk ranked first", 0.612, 0.755], ["Right chunk in the top 5", 0.898, 0.888]]; const NS = "http://www.w3.org/2000/svg";
+  const W = 560, H = 250, mk = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; }; const svg = mk("svg", { viewBox: `0 0 ${W} ${H}` });
+  data.forEach((d, g) => { const x0 = 40 + g * 260; [[d[1], "without reranker", css("--muted")], [d[2], "with reranker", css("--accent")]].forEach(([v, lab, col], i) => { const bh = v * 170, x = x0 + i * 100, y = 200 - bh;
+    svg.append(mk("rect", { x, y, width: 80, height: bh, fill: col, rx: 3 })); const t = mk("text", { x: x + 40, y: y - 6, "text-anchor": "middle", "font-size": 14, "font-weight": 600 }); t.textContent = Math.round(v * 100) + "%"; svg.append(t);
+    const l = mk("text", { x: x + 40, y: 218, "text-anchor": "middle", "font-size": 11 }); l.textContent = lab; svg.append(l); });
+    const t = mk("text", { x: x0 + 90, y: 242, "text-anchor": "middle", "font-size": 12, "font-weight": 600 }); t.textContent = d[0]; svg.append(t); });
+  svg.append(mk("line", { x1: 30, y1: 200, x2: W - 20, y2: 200, stroke: css("--line") }));
+  root.append(h("div", { class: "panel" }, svg, h("div", { class: "callout" }, "Order improved by 14 points (the plausible range excludes zero); coverage did not change. The strong reranker took about 9 seconds a question on a laptop CPU. So it pays only if the model or the user mostly reads the first result, and you can afford the time."),
+    h("div", { class: "src" }, h("b", {}, "Source: "), "docs/COMPARISON.md section 7, BAAI/bge-reranker-v2-m3 (quantised) on 24 candidates against bge-small + BM25, paired bootstrap on the same 55 questions. One document set; five metrics were compared.")));
+  root.append(h("div", { class: "panel" }, h("h3", {}, "Today's checklist, filled in"), h("ol", {}, h("li", {}, h("b", {}, "Read the exact chunks sent."), " The right document is not the right chunk (arena, chunking tabs)."), h("li", {}, h("b", {}, "Check the chunking."), " A clause cut in two, a table cut from its header, chunks too tiny to carry the answer."), h("li", {}, h("b", {}, "Check the embeddings."), " High scores mean similar topic, not same answer: look-alike IDs, numbers and opposites score high."), h("li", {}, h("b", {}, "Check search settings."), " Keywords for exact tokens, meaning for paraphrases, candidate depth, filters inside the search."), h("li", {}, h("b", {}, "Only then the model."), " Session 3: reranking, writing grounded answers, saying 'not found'."))));
+  return root;
+}
+const VIEWS = { anatomy: vAnatomy, embeddings: vEmbeddings, chunking: vChunking, hood: vHood, arena: vArena, preview: vPreview };
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1) || "anatomy");
+</script>
