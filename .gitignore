@@ -186,3 +186,6 @@ output/
 .ruff_cache/
 .DS_Storereports/
 slides/ref/
+
+# unreleased learner handout; regenerate with scripts/build_take_home_pdf.py
+lab_repo/docs/TAKE_HOME_PART2.pdf

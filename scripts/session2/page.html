@@ -148,7 +148,7 @@ function vAnatomy() {
   const A = D.anatomy, root = h("div");
   root.append(h("div", { class: "panel" },
     h("h2", {}, "One stored point, opened"),
-    h("p", { class: "sub" }, "This is the child point for slide 3 of the board update from Session 1: the same one the verify command printed. A point is an id, two vectors and a payload of labels.")));
+    h("p", { class: "sub" }, "This is one of the 25 points you loaded in Session 1 and saw in Qdrant: the child point for slide 3 of the board update. A point is an id, two vectors and a payload of labels.")));
   const g = h("div", { class: "grid" });
   const rows = Object.entries(A.payload).map(([k, v]) => h("tr", {}, h("td", { class: "mono" }, k), h("td", { class: "mono" }, JSON.stringify(v)), h("td", { class: "note" }, FIELD_MEANING[k] || "")));
   g.append(h("div", { class: "panel" }, h("h3", {}, "Payload (the labels)"), h("div", { class: "scroll" }, h("table", {}, h("tr", {}, h("th", {}, "field"), h("th", {}, "value"), h("th", {}, "meaning")), rows))));
@@ -165,7 +165,7 @@ function vAnatomy() {
     h("p", { class: "note" }, "Not just the chunk text. The program adds the document name and the section in front, so look-alike tables from different files stay distinguishable:"),
     h("div", { class: "chunk" }, A.embed_text),
     h("div", { class: "callout" }, "Debug lesson: when a chunk is retrieved or missed, ask what text was embedded, not only what text is displayed."),
-    h("div", { class: "src" }, h("b", {}, "Source: "), "recomputed with bge-small and BM25 from the Session 1 lab file. The first six numbers match the lab's verify output exactly.")));
+    h("div", { class: "src" }, h("b", {}, "Source: "), "recomputed with bge-small and BM25 from the Session 1 lab file. The first six numbers match what the lab's verify command prints for this point.")));
   return root;
 }
 
