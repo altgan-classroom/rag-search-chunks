@@ -1,0 +1,5 @@
+# Session 2 arena recipe: structure-aware chunks up to 150 tokens, hybrid search. Same recipe as the visual lab page.
+description: "Session 2 arena: structure-aware 150-token chunks, hybrid dense + BM25"
+embedding: {dense_model: BAAI/bge-small-en-v1.5, sparse_model: Qdrant/bm25}
+chunking: {strategy: structure, size: 150, overlap: 20, parent_child: false}
+retrieval: {mode: hybrid, top_k: 20, fusion: rrf}

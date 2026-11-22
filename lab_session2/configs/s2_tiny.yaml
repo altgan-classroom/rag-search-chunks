@@ -1,0 +1,5 @@
+# Take-home: tiny chunks (up to 40 tokens).
+description: "Structure-aware, tiny chunks (40 tokens)"
+embedding: {dense_model: BAAI/bge-small-en-v1.5, sparse_model: Qdrant/bm25}
+chunking: {strategy: structure, size: 40, overlap: 8, parent_child: false}
+retrieval: {mode: hybrid, top_k: 20, fusion: rrf}

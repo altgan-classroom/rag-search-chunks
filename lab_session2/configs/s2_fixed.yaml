@@ -1,0 +1,5 @@
+# Take-home: cut every 500 characters, ignoring headings and clauses.
+description: "Fixed windows of 500 characters"
+embedding: {dense_model: BAAI/bge-small-en-v1.5, sparse_model: Qdrant/bm25}
+chunking: {strategy: fixed_words, size: 500, overlap: 50, parent_child: false}
+retrieval: {mode: hybrid, top_k: 20, fusion: rrf}

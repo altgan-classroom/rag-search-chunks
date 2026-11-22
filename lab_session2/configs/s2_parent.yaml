@@ -1,0 +1,5 @@
+# Take-home: search small pieces (100 tokens) but send the whole parent section (1500 tokens) to the model.
+description: "Small children, parent sections sent to the model"
+embedding: {dense_model: BAAI/bge-small-en-v1.5, sparse_model: Qdrant/bm25}
+chunking: {strategy: structure, size: 100, overlap: 20, parent_child: true, parent_size: 1500}
+retrieval: {mode: hybrid, top_k: 20, fusion: rrf}

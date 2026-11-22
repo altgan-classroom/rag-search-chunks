@@ -19,6 +19,9 @@ x-app: &app
     - ./data/raw:/data/raw:ro              # drop up to 5 of your own files here
     - ./challenge:/challenge:ro
     - ./data/load:/data/load:ro            # generated load for the scaling exercise
+    - ./data/session2:/data/session2:ro    # Session 2: six invented insurance policies
+    - ./scripts:/scripts:ro                # Session 2 helper (ingest / ask / collections)
+    - ./configs:/app/configs:ro            # chunking recipes: edit a .yaml here and re-run, no rebuild needed
 
 services:
   qdrant:
@@ -74,5 +77,11 @@ services:
       - ./data/raw:/data/raw:ro
       - ./data/load:/data/load                # the only place a lab container writes files
     depends_on: {redis: {condition: service_healthy}}   # NOT qdrant: it must keep working while qdrant is down
+
+  # ---- Session 2: ingest six policies with a chunking recipe, then rank the same chunks three ways ---------------
+  s2:
+    <<: *app
+    entrypoint: ["python", "/scripts/s2.py"]       # docker compose run --rm s2 ingest | ask q3 | collections
+    depends_on: {qdrant: {condition: service_healthy}}
 
 volumes: {qdrant_storage: {}}
