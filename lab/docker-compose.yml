@@ -1,8 +1,9 @@
-# RAG ingestion lab. Own project name, so `docker compose down -v` here can never touch anything else on your machine.
+# RAG lab (Sessions 1 and 2). Run every command from THIS folder (lab/). The project name is kept as rag-ingested-docs ON PURPOSE:
+# if you did the Session 1 lab you reuse the same Qdrant database and image. Own project name, so `docker compose down -v` here can never touch anything else on your machine.
 name: rag-ingested-docs
 
 x-app: &app
-  build: {context: .}
+  build: {context: .., dockerfile: lab/Dockerfile}   # the build context is the repo root (it needs ../src and ../pyproject.toml)
   image: rag-ingested-docs:latest
   environment: &env
     ORCA_QDRANT__URL: http://qdrant:6333
@@ -20,6 +21,7 @@ x-app: &app
     - ./challenge:/challenge:ro
     - ./data/load:/data/load:ro            # generated load for the scaling exercise
     - ./data/session2:/data/session2:ro    # Session 2: six invented insurance policies
+    - ./data/session2_extra:/data/session2_extra:ro   # Session 2: eight more (for the bigger corpus)
     - ./scripts:/scripts:ro                # Session 2 helper (ingest / ask / collections)
     - ./configs:/app/configs:ro            # chunking recipes: edit a .yaml here and re-run, no rebuild needed
 

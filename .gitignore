@@ -187,3 +187,6 @@ output/
 .DS_Storereports/
 slides/ref/
 
+
+# the lab folder ships its own sample data
+!lab/data/

@@ -1,0 +1,6 @@
+*
+!pyproject.toml
+!src
+!lab/configs
+**/__pycache__
+*.pyc
