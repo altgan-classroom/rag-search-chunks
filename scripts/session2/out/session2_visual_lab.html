@@ -242,7 +242,7 @@ function vEmbeddings() {
   const svg2 = document.createElementNS(NS, "svg"); svg2.setAttribute("viewBox", `0 0 ${W} ${H}`);
   const nn = h("div", { class: "note" }, "Nothing selected."); let selIdx = null; const pts = [];
   const choose = k => { selIdx = k; const order = items.map((_, j) => j).filter(j => j !== k).sort((a, b) => cosAt(k, b) - cosAt(k, a)).slice(0, 5); nn.innerHTML = "";
-    nn.append(h("div", { style: "font-weight:600;margin-bottom:6px" }, `"${items[k].text}"`), order.map(j => h("div", { class: "hit", style: "grid-template-columns:1fr auto" }, h("span", {}, items[j].text), h("span", { class: "mono" }, cosAt(k, j).toFixed(3)))));
+    nn.append(h("div", { style: "font-weight:600;margin-bottom:6px" }, `"${items[k].text}"`), ...order.map(j => h("div", { class: "hit", style: "grid-template-columns:1fr auto" }, h("span", {}, items[j].text), h("span", { class: "mono" }, cosAt(k, j).toFixed(3)))));
     pts.forEach((p, i) => p.setAttribute("stroke", i === k ? css("--ink") : "none")); };
   items.forEach((it, k) => { const q = it.group === "query"; const c = mk(q ? "path" : "circle", q ? { d: "M0,-8 L2.4,-2.4 L8,-2 L3.6,1.6 L5,7.4 L0,4.2 L-5,7.4 L-3.6,1.6 L-8,-2 L-2.4,-2.4 Z", transform: `translate(${sx(E.pca[k][0])},${sy(E.pca[k][1])})` } : { cx: sx(E.pca[k][0]), cy: sy(E.pca[k][1]), r: 6 });
     c.setAttribute("fill", GCOL[it.group]); c.setAttribute("stroke-width", 2); c.style.cursor = "pointer"; c.addEventListener("click", () => choose(k)); const tt = mk("title", {}); tt.textContent = it.text; c.append(tt); pts.push(c); svg2.append(c);
